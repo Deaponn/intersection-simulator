@@ -1,4 +1,4 @@
-import { Destination, Direction } from '#types/index.js';
+import { Destination, Direction } from '#simulation/types/index.js';
 
 export default class Car {
     private readonly vehicleId: string;

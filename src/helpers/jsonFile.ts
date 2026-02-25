@@ -2,7 +2,9 @@ import { writeFile } from 'fs';
 
 // TODO: add validation using runtypes
 export function load(path: string): unknown {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    /* eslint-disable-next-line @typescript-eslint/no-require-imports --
+    * Disabling this rule because we are requireing local file, not a lib
+    */ 
     const commands = require(path) as unknown;
     return commands;
 }

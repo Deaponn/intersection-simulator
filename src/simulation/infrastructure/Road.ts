@@ -1,9 +1,20 @@
-import Lane from './Lane.js';
+import { Axis } from '#simulation/types/index.js';
+
+import InputLane from './InputLane.js';
+import OutputLane from './OutputLane.js';
 
 export default class Road {
-    private readonly lanes: Lane[];
+    private readonly inputLanes: InputLane[];
+    private readonly outputLanes: OutputLane[];
+    private readonly axis: Axis;
 
-    constructor(lanes: Lane[]) {
-        this.lanes = lanes;
+    constructor(
+        axis: Axis,
+        inputLanes: InputLane[],
+        outputLanes: OutputLane[],
+    ) {
+        this.axis = axis;
+        this.inputLanes = inputLanes;
+        this.outputLanes = outputLanes;
     }
 }
