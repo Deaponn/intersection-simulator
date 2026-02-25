@@ -19,6 +19,9 @@ export default defineConfig(
                 projectService: true,
             },
         },
+        linterOptions: {
+            reportUnusedDisableDirectives: 'error',
+        },
     },
     perfectionist.configs['recommended-natural'],
     eslintConfigPrettier,
@@ -34,7 +37,7 @@ export default defineConfig(
     },
     {
         rules: {
-            'perfectionist/sort-classes': 'off'
-        }
-    }
+            'perfectionist/sort-classes': 'off',
+        },
+    },
 );
