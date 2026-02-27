@@ -1,15 +1,15 @@
-export type Axis = 'horizontal' | 'vertical';
+import { axes, relativeDirections, worldDirections } from "#constants.js";
+import controllers from "#simulation/controllers/index.js";
 
-export type Destination = 'East' | 'North' | 'South' | 'West';
+export type Axis = (typeof axes)[number];
 
-export type Direction = 'Left' | 'Right' | 'StraightAhead';
+export type WorldDirection = (typeof worldDirections)[number];
 
-export interface TrafficArrowsState {
-    east: boolean;
-    north: boolean;
-    south: boolean;
-    west: boolean;
-}
+export type RelativeDirection = (typeof relativeDirections)[number];
+
+export type TrafficArrowsState = Record<WorldDirection, boolean>;
+
+export type ControllerTypes = keyof typeof controllers;
 
 export interface TrafficLightsState {
     arrows: TrafficArrowsState;

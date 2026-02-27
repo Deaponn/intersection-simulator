@@ -1,12 +1,18 @@
 import Car from '#simulation/actors/Car.js';
-import { Direction } from '#simulation/types/index.js';
+import { WorldDirection } from '#simulation/types/index.js';
+import OutputLane from './OutputLane.js';
 
-export default class Lane {
+export default class InputLane {
     private readonly preLightsCars: Car[] = [];
     private postLightsCar: Car | null = null;
-    private destinationLanes: Record<Direction, Lane | null>;
+    private readonly destinationLanes: Record<WorldDirection, OutputLane | null> = {
+        north: null,
+        east: null,
+        south: null,
+        west: null,
+    };
 
-    constructor(destinationLanes: Record<Direction, Lane | null>) {
-        this.destinationLanes = destinationLanes;
+    public assignDestinationLane(direction: WorldDirection, lane: OutputLane) {
+        this.destinationLanes[direction] = lane;
     }
 }

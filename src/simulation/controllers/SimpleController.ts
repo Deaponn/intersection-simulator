@@ -1,17 +1,9 @@
-import Intersection from '#simulation/infrastructure/Intersection.js';
 import { TrafficLightsState } from '#simulation/types/index.js';
-
 import Controller from './Controller.js';
 
 export default class SimpleController extends Controller {
-    private readonly intersection: Intersection;
     private time = 0;
     private isVerticalGreen = true;
-
-    constructor(intersection: Intersection) {
-        super();
-        this.intersection = intersection;
-    }
 
     public step(): TrafficLightsState {
         this.time++;
