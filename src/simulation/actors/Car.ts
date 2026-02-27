@@ -15,4 +15,8 @@ export default class Car {
     public getId() {
         return this.vehicleId;
     }
+
+    public getDirection() {
+        return this.direction;
+    }
 }

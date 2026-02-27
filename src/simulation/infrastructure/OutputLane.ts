@@ -5,39 +5,45 @@ import { Axis, TrafficLightsState } from '#simulation/types/index.js';
 export default class OutputLane {
     private readonly axis: Axis;
 
-    private readonly hasCrosswalk: boolean;
     private pedestriansWaiting: Pedestrian[] = [];
     private pedestriansCrossed: Pedestrian[] = [];
-    private willPedestriansWalk = false;
+    private pedestriansCrossing = false;
 
     private preCrosswalkCar: Car | null = null;
     private postCrosswalkCar: Car | null = null;
     private willPreCrosswalkDrive = false;
 
-    constructor(axis: Axis, hasCrosswalk: boolean) {
+    constructor(axis: Axis) {
         this.axis = axis;
-        this.hasCrosswalk = hasCrosswalk;
     }
 
     public decidePedestrians(lights: TrafficLightsState) {
-        this.willPedestriansWalk = lights.greenAxis === this.axis;
+        this.pedestriansCrossing = lights.greenAxis === this.axis;
     }
 
     public walkPedestrians() {
-        if (this.willPedestriansWalk) { // all pedestrians cross at the same time, in one simulation step
-            this.pedestriansCrossed = this.pedestriansWaiting;
-            this.pedestriansWaiting = [];
-        }
+        if (!this.pedestriansCrossing) return;
+         // all pedestrians cross at the same time, in one simulation step
+        this.pedestriansCrossed = this.pedestriansWaiting;
+        this.pedestriansWaiting = [];
     }
 
     public decidePreCrosswalk() {
-        this.willPreCrosswalkDrive = !this.willPedestriansWalk; // rule is simple: don't run over pedestrians :)
+        this.willPreCrosswalkDrive = !this.pedestriansCrossing; // rule is simple: don't run over pedestrians :)
     }
 
     public drivePreCrosswalk() {
         if (!this.willPreCrosswalkDrive) return;
         this.postCrosswalkCar = this.preCrosswalkCar;
         this.preCrosswalkCar = null;
+    }
+
+    public willHaveSpacePreCrosswalk(): boolean {
+        return !this.preCrosswalkCar || this.willPreCrosswalkDrive;
+    }
+
+    public driveIntoPreCrosswalk(car: Car) {
+        this.preCrosswalkCar = car;
     }
 
     public collectOutputActors(): string[] {

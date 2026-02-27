@@ -1,4 +1,4 @@
-import { RelativeDirection, WorldDirection } from "#simulation/types/index.js";
+import { Axis, RelativeDirection, WorldDirection } from "#simulation/types/index.js";
 
 const worldAndRelativeToWorldDirection: Record<WorldDirection, Record<RelativeDirection, WorldDirection>> = {
     north: {
@@ -23,4 +23,11 @@ const worldAndRelativeToWorldDirection: Record<WorldDirection, Record<RelativeDi
     },
 };
 
-export { worldAndRelativeToWorldDirection };
+const axisOfDirection: Record<WorldDirection, Axis> = {
+    north: 'vertical',
+    east: 'horizontal',
+    south: 'vertical',
+    west: 'horizontal'
+};
+
+export { worldAndRelativeToWorldDirection, axisOfDirection };

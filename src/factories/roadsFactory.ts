@@ -16,14 +16,31 @@ interface RoadDescription {
 
 export type IntersectionDescription = Record<WorldDirection, RoadDescription>;
 
+const inputLanesFactory = (
+    intersectionDescription: IntersectionDescription,
+    position: WorldDirection,
+    roads: Record<WorldDirection, Road>,
+) =>
+    Array.from(
+        { length: intersectionDescription[position].lanes.length },
+        (_e, idx) => new InputLane(position, idx - 1 === intersectionDescription[position].lanes.length, roads),
+    );
+
 const roadsFactory: (intersectionDescription: IntersectionDescription) => Record<WorldDirection, Road> = (
     intersectionDescription: IntersectionDescription,
 ) => {
+    const roads: Record<WorldDirection, Road> = {
+        north: new Road('vertical', allInputLanes.north, allOutputLanes.north),
+        east: new Road('horizontal', allInputLanes.east, allOutputLanes.east),
+        south: new Road('vertical', allInputLanes.south, allOutputLanes.south),
+        west: new Road('horizontal', allInputLanes.west, allOutputLanes.west),
+    };
+
     const allInputLanes: Record<WorldDirection, InputLane[]> = {
-        north: Array.from({ length: intersectionDescription.north.lanes.length }, () => new InputLane()),
-        east: Array.from({ length: intersectionDescription.east.lanes.length }, () => new InputLane()),
-        south: Array.from({ length: intersectionDescription.south.lanes.length }, () => new InputLane()),
-        west: Array.from({ length: intersectionDescription.west.lanes.length }, () => new InputLane()),
+        north: inputLanesFactory(intersectionDescription, 'north', roads),
+        east: inputLanesFactory(intersectionDescription, 'east', roads),
+        south: inputLanesFactory(intersectionDescription, 'south', roads),
+        west: inputLanesFactory(intersectionDescription, 'west', roads),
     };
 
     const allOutputLanes: Record<WorldDirection, OutputLane[]> = {
@@ -58,13 +75,6 @@ const roadsFactory: (intersectionDescription: IntersectionDescription) => Record
             }
         }
     }
-
-    const roads: Record<WorldDirection, Road> = {
-        north: new Road('vertical', allInputLanes.north, allOutputLanes.north),
-        east: new Road('horizontal', allInputLanes.east, allOutputLanes.east),
-        south: new Road('vertical', allInputLanes.south, allOutputLanes.south),
-        west: new Road('horizontal', allInputLanes.west, allOutputLanes.west),
-    };
 
     return roads;
 };

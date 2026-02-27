@@ -1,19 +1,18 @@
-import { Axis, TrafficLightsState } from '#simulation/types/index.js';
+import { Axis, RelativeDirection, TrafficLightsState } from '#simulation/types/index.js';
 
 import InputLane from './InputLane.js';
 import OutputLane from './OutputLane.js';
 
 export default class Road {
-    private readonly inputLanes: InputLane[];
-    private readonly outputLanes: OutputLane[];
+    private inputLanes: InputLane[] = [];
+    private outputLanes: OutputLane[] = [];
     private readonly axis: Axis;
 
-    constructor(
-        axis: Axis,
-        inputLanes: InputLane[],
-        outputLanes: OutputLane[],
-    ) {
+    constructor(axis: Axis) {
         this.axis = axis;
+    }
+
+    public assignLanes(inputLanes: InputLane[], outputLanes: OutputLane[]) {
         this.inputLanes = inputLanes;
         this.outputLanes = outputLanes;
     }
@@ -21,7 +20,7 @@ export default class Road {
     public decidePedestrians(lights: TrafficLightsState) {
         for (const lane of this.outputLanes) lane.decidePedestrians(lights);
     }
-    
+
     public decidePreCrosswalk() {
         for (const lane of this.outputLanes) lane.decidePreCrosswalk();
     }
@@ -29,7 +28,7 @@ export default class Road {
     public decidePostLights(lights: TrafficLightsState) {
         for (const lane of this.inputLanes) lane.decidePostLights(lights);
     }
-    
+
     public decidePreLights(lights: TrafficLightsState) {
         for (const lane of this.inputLanes) lane.decidePreLights(lights);
     }
@@ -45,12 +44,16 @@ export default class Road {
     public drivePostLights() {
         for (const lane of this.inputLanes) lane.drivePostLights();
     }
-    
+
     public drivePreLights() {
         for (const lane of this.inputLanes) lane.drivePreLights();
     }
 
+    public hasCarsDriving(direction: RelativeDirection): boolean {
+        return this.inputLanes.some(lane => lane.hasCarInPostLights(direction));
+    }
+
     public collectCompletedActors(): string[] {
-        return this.outputLanes.flatMap(lane => lane.collectOutputActors());
-    } 
+        return this.outputLanes.flatMap((lane) => lane.collectOutputActors());
+    }
 }
