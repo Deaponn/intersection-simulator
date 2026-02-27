@@ -4,4 +4,8 @@ export default class Pedestrian {
     constructor(pedestrianId: string) {
         this.pedestrianId = pedestrianId;
     }
+
+    public getId() {
+        return this.pedestrianId;
+    }
 }

@@ -18,13 +18,50 @@ export default class Intersection {
     }
 
     public step(): StepStatus {
-        const lights = this.controller.step();
-        Object.values(this.roads).forEach((road) => road.drivePreCrosswalk());
-        Object.values(this.roads).forEach((road) =>
-            road.drivePostLights(lights),
-        );
-        Object.values(this.roads).forEach((road) =>
-            road.drivePreLights(lights),
-        );
+        const lights = this.controller.step(this);
+        this.decideAboutDriving(lights);
+        this.drive();
+        return this.collectCompletedActors(lights);
+    }
+
+    private decideAboutDriving(lights: TrafficLightsState) {
+        Object.values(this.roads).forEach((road) => {
+            road.decidePedestrians(lights);
+        });
+        Object.values(this.roads).forEach((road) => {
+            road.decidePreCrosswalk();
+        });
+        Object.values(this.roads).forEach((road) => {
+            road.decidePostLights(lights);
+        });
+        Object.values(this.roads).forEach((road) => {
+            road.decidePreLights(lights);
+        });
+    }
+
+    private drive() {
+        Object.values(this.roads).forEach((road) => {
+            road.walkPedestrians();
+        });
+        Object.values(this.roads).forEach((road) => {
+            road.drivePreCrosswalk();
+        });
+        Object.values(this.roads).forEach((road) => {
+            road.drivePostLights();
+        });
+        Object.values(this.roads).forEach((road) => {
+            road.drivePreLights();
+        });
+    }
+
+    private collectCompletedActors(lights: TrafficLightsState): StepStatus {
+        return {
+            trafficLights: lights,
+            leftVehicles: Object.values(this.roads).flatMap((road) => road.collectCompletedActors()),
+        };
+    }
+
+    public getRoads() {
+        return this.roads;
     }
 }

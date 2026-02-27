@@ -1,17 +1,18 @@
-import { Destination, Direction } from '#simulation/types/index.js';
+import { RelativeDirection } from '#simulation/types/index.js';
 
 export default class Car {
     private readonly vehicleId: string;
-    private readonly destination: Destination;
-    private readonly direction: Direction;
+    private readonly direction: RelativeDirection;
 
     constructor(
         vehicleId: string,
-        destination: Destination,
-        direction: Direction,
+        direction: RelativeDirection,
     ) {
         this.vehicleId = vehicleId;
-        this.destination = destination;
         this.direction = direction;
+    }
+
+    public getId() {
+        return this.vehicleId;
     }
 }

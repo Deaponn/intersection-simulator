@@ -15,4 +15,11 @@ export default class InputLane {
     public assignDestinationLane(direction: WorldDirection, lane: OutputLane) {
         this.destinationLanes[direction] = lane;
     }
+
+    public drivePreLights(canDrive: boolean) {
+        if (!canDrive) return;
+        const car = this.preLightsCars.shift();
+        if (car === undefined || this.postLightsCar !== null) return;
+        this.postLightsCar = car;
+    }
 }
