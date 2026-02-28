@@ -1,5 +1,5 @@
 import { worldDirections } from '#constants.js';
-import { axisOfDirection, worldAndRelativeToWorldDirection } from '#helpers/directionConversions.js';
+import { worldAndRelativeToWorldDirection } from '#helpers/directionConversions.js';
 import InputLane from '#simulation/infrastructure/InputLane.js';
 import OutputLane from '#simulation/infrastructure/OutputLane.js';
 import Road from '#simulation/infrastructure/Road.js';
@@ -30,10 +30,10 @@ const roadsFactory: (intersectionDescription: IntersectionDescription) => Record
     intersectionDescription: IntersectionDescription,
 ) => {
     const roads: Record<WorldDirection, Road> = {
-        north: new Road('vertical'),
-        east: new Road('horizontal'),
-        south: new Road('vertical'),
-        west: new Road('horizontal'),
+        north: new Road('north'),
+        east: new Road('east'),
+        south: new Road('south'),
+        west: new Road('west'),
     };
 
     const allInputLanes: Record<WorldDirection, InputLane[]> = {
@@ -66,7 +66,7 @@ const roadsFactory: (intersectionDescription: IntersectionDescription) => Record
                 const destination = worldAndRelativeToWorldDirection[worldDirection][turn];
 
                 if (allOutputLanes[destination].length === outputLanesCounters[turn]) {
-                    const newOutputLane = new OutputLane(axisOfDirection[destination]);
+                    const newOutputLane = new OutputLane(roads[destination]);
                     allOutputLanes[destination].push(newOutputLane);
                 }
 

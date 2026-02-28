@@ -1,4 +1,7 @@
-import { Axis, RelativeDirection, TrafficLightsState } from '#simulation/types/index.js';
+import { axisOfDirection } from '#helpers/directionConversions.js';
+import Car from '#simulation/actors/Car.js';
+import Pedestrian from '#simulation/actors/Pedestrian.js';
+import { Axis, RelativeDirection, RoadSide, TrafficLightsState, WorldDirection } from '#simulation/types/index.js';
 
 import InputLane from './InputLane.js';
 import OutputLane from './OutputLane.js';
@@ -8,8 +11,12 @@ export default class Road {
     private outputLanes: OutputLane[] = [];
     private readonly axis: Axis;
 
-    constructor(axis: Axis) {
-        this.axis = axis;
+    private pedestriansWaiting: Record<RoadSide, Pedestrian[]> = { left: [], right: [] };
+    private pedestriansCrossed: Pedestrian[] = [];
+    private willPedestriansCross = false;
+
+    constructor(position: WorldDirection) {
+        this.axis = axisOfDirection[position];
     }
 
     public assignLanes(inputLanes: InputLane[], outputLanes: OutputLane[]) {
@@ -18,7 +25,7 @@ export default class Road {
     }
 
     public decidePedestrians(lights: TrafficLightsState) {
-        for (const lane of this.outputLanes) lane.decidePedestrians(lights);
+        this.willPedestriansCross = lights.greenAxis === this.axis;
     }
 
     public decidePreCrosswalk() {
@@ -34,7 +41,12 @@ export default class Road {
     }
 
     public walkPedestrians() {
-        for (const lane of this.outputLanes) lane.walkPedestrians();
+        if (!this.willPedestriansCross) return;
+        // all pedestrians cross at the same time, in one simulation step
+        this.pedestriansCrossed = [...this.pedestriansWaiting.left, ...this.pedestriansWaiting.right];
+        this.pedestriansWaiting.left = [];
+        this.pedestriansWaiting.right = [];
+        this.willPedestriansCross = false;
     }
 
     public drivePreCrosswalk() {
@@ -49,11 +61,33 @@ export default class Road {
         for (const lane of this.inputLanes) lane.drivePreLights();
     }
 
+    public driveIntoLane(car: Car, laneIdx: number) {
+        this.inputLanes[laneIdx].driveIntoPreLights(car);
+    }
+
+    public walkUpToCrosswalk(pedestrian: Pedestrian, side: RoadSide) {
+        this.pedestriansWaiting[side].push(pedestrian);
+    }
+
+    public willPedestriansCrossFrom(side: RoadSide) {
+        return this.willPedestriansCross && this.pedestriansWaiting[side].length > 0;
+    }
+
     public hasCarsDriving(direction: RelativeDirection): boolean {
-        return this.inputLanes.some(lane => lane.hasCarInPostLights(direction));
+        return this.inputLanes.some((lane) => lane.hasCarInPostLights(direction));
+    }
+
+    public findSufficientLane(direction: RelativeDirection): number {
+        // looping from right to left, because the traffic in Poland is right-handed
+        for (let idx = this.inputLanes.length - 1; idx >= 0; idx--) {
+            if (this.inputLanes[idx].canDrive(direction)) return idx;
+        }
+        return -1;
     }
 
     public collectCompletedActors(): string[] {
-        return this.outputLanes.flatMap((lane) => lane.collectOutputActors());
+        const actorIds = this.pedestriansCrossed.map((pedestrian) => pedestrian.getId());
+        this.pedestriansCrossed = [];
+        return [...actorIds, ...this.outputLanes.flatMap((lane) => lane.collectOutput()).filter((id) => id !== null)];
     }
 }

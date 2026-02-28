@@ -1,12 +1,13 @@
 import { axisOfDirection, worldAndRelativeToWorldDirection } from '#helpers/directionConversions.js';
 import Car from '#simulation/actors/Car.js';
-import { RelativeDirection, TrafficLightsState, WorldDirection } from '#simulation/types/index.js';
+import { Axis, RelativeDirection, TrafficLightsState, WorldDirection } from '#simulation/types/index.js';
 import OutputLane from './OutputLane.js';
 import Road from './Road.js';
 
 export default class InputLane {
     private readonly position: WorldDirection;
     private readonly isRightmostLane: boolean;
+    private readonly axis: Axis;
     private readonly otherRoads: Record<RelativeDirection, Road>;
 
     private readonly preLightsCars: Car[] = [];
@@ -25,6 +26,7 @@ export default class InputLane {
     constructor(position: WorldDirection, isRightmostLane: boolean, otherRoads: Record<WorldDirection, Road>) {
         this.position = position;
         this.isRightmostLane = isRightmostLane;
+        this.axis = axisOfDirection[position];
         this.relativeToWorldDirection = worldAndRelativeToWorldDirection[this.position];
         this.otherRoads = {
             left: otherRoads[this.relativeToWorldDirection.left],
@@ -35,6 +37,10 @@ export default class InputLane {
 
     public assignDestinationLane(direction: WorldDirection, lane: OutputLane) {
         this.destinationLanes[direction] = lane;
+    }
+
+    public canDrive(direction: RelativeDirection): boolean {
+        return this.destinationLanes[this.relativeToWorldDirection[direction]] !== null;
     }
 
     public decidePostLights(lights: TrafficLightsState) {
@@ -61,13 +67,13 @@ export default class InputLane {
     }
 
     private checkIfRightTurnClear(lights: TrafficLightsState): boolean {
-        if (lights.greenAxis === axisOfDirection[this.position]) return true;
+        if (lights.greenAxis === this.axis) return true;
         if (this.otherRoads.left.hasCarsDriving('straightAhead')) return false; // give way to others
         return true;
     }
 
     private checkIfStraightAheadClear(lights: TrafficLightsState): boolean {
-        if (lights.greenAxis === axisOfDirection[this.position]) return true;
+        if (lights.greenAxis === this.axis) return true;
         if (
             this.otherRoads.right.hasCarsDriving('right') ||
             this.otherRoads.right.hasCarsDriving('straightAhead') ||
@@ -81,7 +87,7 @@ export default class InputLane {
 
     private checkIfLeftTurnClear(lights: TrafficLightsState): boolean {
         if (
-            lights.greenAxis === axisOfDirection[this.position] &&
+            lights.greenAxis === this.axis &&
             !this.otherRoads.straightAhead.hasCarsDriving('right') &&
             !this.otherRoads.straightAhead.hasCarsDriving('straightAhead')
         )
@@ -101,10 +107,7 @@ export default class InputLane {
 
     public decidePreLights(lights: TrafficLightsState) {
         if (this.postLightsCar !== null && !this.willPostLightsDrive) return;
-        if (
-            lights.greenAxis === axisOfDirection[this.position] ||
-            (this.isRightmostLane && lights.arrows[this.position])
-        )
+        if (lights.greenAxis === this.axis || (this.isRightmostLane && lights.arrows[this.position]))
             this.willPreLightsDrive = true;
     }
 
@@ -126,6 +129,10 @@ export default class InputLane {
         if (car === undefined) return;
         this.postLightsCar = car;
         this.willPreLightsDrive = false;
+    }
+
+    public driveIntoPreLights(car: Car) {
+        this.preLightsCars.push(car);
     }
 
     public hasCarInPostLights(direction: RelativeDirection): boolean {
