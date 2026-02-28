@@ -3,18 +3,7 @@ import { worldAndRelativeToWorldDirection } from '#helpers/directionConversions.
 import InputLane from '#simulation/infrastructure/InputLane.js';
 import OutputLane from '#simulation/infrastructure/OutputLane.js';
 import Road from '#simulation/infrastructure/Road.js';
-import { RelativeDirection, WorldDirection } from '#simulation/types/index.js';
-
-interface LaneDescription {
-    availableTurns: RelativeDirection[];
-}
-
-interface RoadDescription {
-    lanes: LaneDescription[];
-    hasCrosswalk: boolean;
-}
-
-export type IntersectionDescription = Record<WorldDirection, RoadDescription>;
+import { IntersectionDescription, RelativeDirection, WorldDirection } from '#simulation/types/index.js';
 
 const inputLanesFactory = (
     intersectionDescription: IntersectionDescription,

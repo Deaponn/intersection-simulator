@@ -1,6 +1,6 @@
 import Car from '#simulation/actors/Car.js';
 import Pedestrian from '#simulation/actors/Pedestrian.js';
-import { RoadSide, TrafficLightsState, WorldDirection } from '#simulation/types/index.js';
+import { IntersectionDescription, RoadSide, TrafficLightsState, WorldDirection } from '#simulation/types/index.js';
 
 import Road from './Road.js';
 
@@ -64,5 +64,26 @@ export default class Intersection {
 
     public getRoads() {
         return this.roads;
+    }
+
+    public static basicIntersection(): IntersectionDescription {
+        return {
+            north: {
+                lanes: [{ availableTurns: ['left', 'right', 'straightAhead'] }],
+                hasCrosswalk: true,
+            },
+            east: {
+                lanes: [{ availableTurns: ['left', 'right', 'straightAhead'] }],
+                hasCrosswalk: true,
+            },
+            south: {
+                lanes: [{ availableTurns: ['left', 'right', 'straightAhead'] }],
+                hasCrosswalk: true,
+            },
+            west: {
+                lanes: [{ availableTurns: ['left', 'right', 'straightAhead'] }],
+                hasCrosswalk: true,
+            },
+        };
     }
 }

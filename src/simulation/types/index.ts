@@ -20,6 +20,23 @@ interface AddPedestrianCommand {
 
 export type Command = { type: 'step' } | AddVehicleCommand | AddPedestrianCommand;
 
+interface LaneDescription {
+    availableTurns: RelativeDirection[];
+}
+
+interface RoadDescription {
+    lanes: LaneDescription[];
+    hasCrosswalk: boolean;
+}
+
+export type IntersectionDescription = Record<WorldDirection, RoadDescription>;
+
+export interface SimulationDescription {
+    intersectionDescription?: IntersectionDescription;
+    controllerType?: ControllerTypes;
+    commands: Command[];
+}
+
 export type Axis = (typeof axes)[number];
 
 export type WorldDirection = (typeof worldDirections)[number];

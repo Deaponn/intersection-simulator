@@ -1,11 +1,18 @@
-import roadsFactory, { IntersectionDescription } from '#factories/roadsFactory.js';
+import roadsFactory from '#factories/roadsFactory.js';
 import { worldAndWorldToRelativeDirection } from '#helpers/directionConversions.js';
 import Car from './actors/Car.js';
 import Pedestrian from './actors/Pedestrian.js';
 import Controller from './controllers/Controller.js';
 import controllers from './controllers/index.js';
 import Intersection from './infrastructure/Intersection.js';
-import { Command, ControllerTypes, RelativeDirection, TrafficLightsState, WorldDirection } from './types/index.js';
+import {
+    Command,
+    ControllerTypes,
+    IntersectionDescription,
+    RelativeDirection,
+    TrafficLightsState,
+    WorldDirection,
+} from './types/index.js';
 
 interface StepStatus {
     leftVehicles: string[];
@@ -36,7 +43,7 @@ export default class Simulation {
             }
             case 'addVehicle': {
                 const { vehicleId, startRoad, endRoad, laneIdx } = command;
-                const car = new Car(vehicleId, this.getRelativeDir(startRoad, endRoad));
+                const car = new Car(vehicleId, Simulation.getRelativeDir(startRoad, endRoad));
                 this.intersection.driveIntoRoad(car, startRoad, laneIdx);
                 return null;
             }
@@ -53,7 +60,7 @@ export default class Simulation {
         return commands.map((command) => this.runCommand(command));
     }
 
-    private getRelativeDir(start: WorldDirection, end: WorldDirection): RelativeDirection {
+    private static getRelativeDir(start: WorldDirection, end: WorldDirection): RelativeDirection {
         const roadMap = worldAndWorldToRelativeDirection[start] as Record<WorldDirection, RelativeDirection>;
         return roadMap[end];
     }
