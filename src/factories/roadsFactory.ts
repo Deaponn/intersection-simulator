@@ -1,5 +1,5 @@
 import { worldDirections } from '#constants.js';
-import { worldAndRelativeToWorldDirection } from '#helpers/directionConversions.js';
+import { axisOfDirection, worldAndRelativeToWorldDirection } from '#helpers/directionConversions.js';
 import InputLane from '#simulation/infrastructure/InputLane.js';
 import OutputLane from '#simulation/infrastructure/OutputLane.js';
 import Road from '#simulation/infrastructure/Road.js';
@@ -30,10 +30,10 @@ const roadsFactory: (intersectionDescription: IntersectionDescription) => Record
     intersectionDescription: IntersectionDescription,
 ) => {
     const roads: Record<WorldDirection, Road> = {
-        north: new Road('vertical', allInputLanes.north, allOutputLanes.north),
-        east: new Road('horizontal', allInputLanes.east, allOutputLanes.east),
-        south: new Road('vertical', allInputLanes.south, allOutputLanes.south),
-        west: new Road('horizontal', allInputLanes.west, allOutputLanes.west),
+        north: new Road('vertical'),
+        east: new Road('horizontal'),
+        south: new Road('vertical'),
+        west: new Road('horizontal'),
     };
 
     const allInputLanes: Record<WorldDirection, InputLane[]> = {
@@ -66,7 +66,7 @@ const roadsFactory: (intersectionDescription: IntersectionDescription) => Record
                 const destination = worldAndRelativeToWorldDirection[worldDirection][turn];
 
                 if (allOutputLanes[destination].length === outputLanesCounters[turn]) {
-                    const newOutputLane = new OutputLane(intersectionDescription[destination].hasCrosswalk);
+                    const newOutputLane = new OutputLane(axisOfDirection[destination]);
                     allOutputLanes[destination].push(newOutputLane);
                 }
 
@@ -75,6 +75,11 @@ const roadsFactory: (intersectionDescription: IntersectionDescription) => Record
             }
         }
     }
+
+    roads.north.assignLanes(allInputLanes.north, allOutputLanes.north);
+    roads.east.assignLanes(allInputLanes.east, allOutputLanes.east);
+    roads.south.assignLanes(allInputLanes.south, allOutputLanes.south);
+    roads.west.assignLanes(allInputLanes.west, allOutputLanes.west);
 
     return roads;
 };

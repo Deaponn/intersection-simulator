@@ -44,44 +44,59 @@ export default class InputLane {
         const destinationLane = this.destinationLanes[destination];
         if (destinationLane === null) throw Error("This car's destination is unreachable from its current lane");
         if (!destinationLane.willHaveSpacePreCrosswalk()) return;
-        if (lights.greenAxis === axisOfDirection[this.position]) {
-            this.willPostLightsDrive = true;
-            return;
-        }
 
         switch (this.postLightsCar.getDirection()) {
             case 'right':
-                if (
-                    this.otherRoads.left.hasCarsDriving('straightAhead') ||
-                    this.otherRoads.straightAhead.hasCarsDriving('left')
-                )
-                    return; // give way to others
-                else break;
+                this.willPostLightsDrive = this.checkIfRightTurnClear(lights);
+                break;
             case 'straightAhead':
-                if (
-                    this.otherRoads.left.hasCarsDriving('left') ||
-                    this.otherRoads.left.hasCarsDriving('straightAhead') ||
-                    this.otherRoads.right.hasCarsDriving('right') ||
-                    this.otherRoads.right.hasCarsDriving('straightAhead') ||
-                    this.otherRoads.straightAhead.hasCarsDriving('left')
-                )
-                    return; // give way to others
-                else break;
+                this.willPostLightsDrive = this.checkIfStraightAheadClear(lights);
+                break;
             case 'left':
-                if (
-                    this.otherRoads.left.hasCarsDriving('left') ||
-                    this.otherRoads.left.hasCarsDriving('straightAhead') ||
-                    this.otherRoads.right.hasCarsDriving('left') ||
-                    this.otherRoads.right.hasCarsDriving('straightAhead') ||
-                    this.otherRoads.straightAhead.hasCarsDriving('left') ||
-                    this.otherRoads.straightAhead.hasCarsDriving('straightAhead') ||
-                    this.otherRoads.straightAhead.hasCarsDriving('right')
-                )
-                    return; // give way to others
-                else break;
+                this.willPostLightsDrive = this.checkIfLeftTurnClear(lights);
+                break;
         }
 
         this.willPostLightsDrive = true;
+    }
+
+    private checkIfRightTurnClear(lights: TrafficLightsState): boolean {
+        if (lights.greenAxis === axisOfDirection[this.position]) return true;
+        if (this.otherRoads.left.hasCarsDriving('straightAhead')) return false; // give way to others
+        return true;
+    }
+
+    private checkIfStraightAheadClear(lights: TrafficLightsState): boolean {
+        if (lights.greenAxis === axisOfDirection[this.position]) return true;
+        if (
+            this.otherRoads.right.hasCarsDriving('right') ||
+            this.otherRoads.right.hasCarsDriving('straightAhead') ||
+            this.otherRoads.right.hasCarsDriving('left') ||
+            this.otherRoads.left.hasCarsDriving('straightAhead') ||
+            this.otherRoads.left.hasCarsDriving('left')
+        )
+            return false; // give way to others
+        return true;
+    }
+
+    private checkIfLeftTurnClear(lights: TrafficLightsState): boolean {
+        if (
+            lights.greenAxis === axisOfDirection[this.position] &&
+            !this.otherRoads.straightAhead.hasCarsDriving('right') &&
+            !this.otherRoads.straightAhead.hasCarsDriving('straightAhead')
+        )
+            return true;
+        if (
+            this.otherRoads.right.hasCarsDriving('straightAhead') ||
+            this.otherRoads.right.hasCarsDriving('left') ||
+            this.otherRoads.straightAhead.hasCarsDriving('right') ||
+            this.otherRoads.straightAhead.hasCarsDriving('straightAhead') ||
+            this.otherRoads.straightAhead.hasCarsDriving('left') ||
+            this.otherRoads.left.hasCarsDriving('straightAhead') ||
+            this.otherRoads.left.hasCarsDriving('left')
+        )
+            return false; // give way to others
+        return true;
     }
 
     public decidePreLights(lights: TrafficLightsState) {
@@ -102,6 +117,7 @@ export default class InputLane {
 
         destinationLane.driveIntoPreCrosswalk(this.postLightsCar);
         this.postLightsCar = null;
+        this.willPostLightsDrive = false;
     }
 
     public drivePreLights() {
@@ -109,6 +125,7 @@ export default class InputLane {
         const car = this.preLightsCars.shift();
         if (car === undefined) return;
         this.postLightsCar = car;
+        this.willPreLightsDrive = false;
     }
 
     public hasCarInPostLights(direction: RelativeDirection): boolean {

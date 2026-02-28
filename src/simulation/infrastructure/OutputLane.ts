@@ -7,7 +7,7 @@ export default class OutputLane {
 
     private pedestriansWaiting: Pedestrian[] = [];
     private pedestriansCrossed: Pedestrian[] = [];
-    private pedestriansCrossing = false;
+    private willPedestriansCross = false;
 
     private preCrosswalkCar: Car | null = null;
     private postCrosswalkCar: Car | null = null;
@@ -18,24 +18,26 @@ export default class OutputLane {
     }
 
     public decidePedestrians(lights: TrafficLightsState) {
-        this.pedestriansCrossing = lights.greenAxis === this.axis;
+        this.willPedestriansCross = lights.greenAxis === this.axis;
     }
 
     public walkPedestrians() {
-        if (!this.pedestriansCrossing) return;
+        if (!this.willPedestriansCross) return;
          // all pedestrians cross at the same time, in one simulation step
         this.pedestriansCrossed = this.pedestriansWaiting;
         this.pedestriansWaiting = [];
+        this.willPedestriansCross = false;
     }
 
     public decidePreCrosswalk() {
-        this.willPreCrosswalkDrive = !this.pedestriansCrossing; // rule is simple: don't run over pedestrians :)
+        this.willPreCrosswalkDrive = !this.willPedestriansCross; // rule is simple: don't run over pedestrians :)
     }
 
     public drivePreCrosswalk() {
         if (!this.willPreCrosswalkDrive) return;
         this.postCrosswalkCar = this.preCrosswalkCar;
         this.preCrosswalkCar = null;
+        this.willPreCrosswalkDrive = false;
     }
 
     public willHaveSpacePreCrosswalk(): boolean {
