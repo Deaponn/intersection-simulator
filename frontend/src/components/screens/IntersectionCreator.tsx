@@ -1,7 +1,7 @@
 import { Box, Grid, Paper, Button } from "@mui/material";
 import IntersectionControls from "../controls/IntersectionControls";
 import { useUIStore } from "../../store/useUIStore";
-// import IntersectionCanvas from "../../canvas/IntersectionCanvas";
+import IntersectionCanvas from "../../canvas/IntersectionCanvas";
 
 export default function IntersectionCreator() {
   const setStep = useUIStore((state) => state.setStep);
@@ -31,9 +31,10 @@ export default function IntersectionCreator() {
               alignItems: "center",
               justifyContent: "center",
               bgcolor: "#e0e0e0",
+              overflow: "hidden",
             }}
           >
-            Canvas goes here
+            <IntersectionCanvas mode="edit" />
           </Paper>
         </Grid>
       </Grid>
