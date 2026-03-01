@@ -35,7 +35,7 @@ export default defineConfig(
     },
     {
         rules: {
-            '@typescript-eslint/restrict-template-expressions': 'off'
-        }
-    }
+            '@typescript-eslint/restrict-template-expressions': 'off',
+        },
+    },
 );

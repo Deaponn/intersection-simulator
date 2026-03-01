@@ -2,7 +2,7 @@ import { writeFile } from 'fs';
 
 // TODO: add validation using runtypes
 export async function load(path: string): Promise<unknown> {
-    const commands = await import(path) as unknown;
+    const commands = (await import(path)) as unknown;
     return commands;
 }
 
