@@ -1,6 +1,12 @@
 import { axisOfDirection, worldAndRelativeToWorldDirection } from '#helpers/directionConversions.js';
 import Car from '#simulation/actors/Car.js';
-import { Axis, RelativeDirection, TrafficLightsState, WorldDirection } from '#simulation/types/index.js';
+import {
+    Axis,
+    InputLanesSnapshot,
+    RelativeDirection,
+    TrafficLightsState,
+    WorldDirection,
+} from '#simulation/types/index.js';
 import OutputLane from './OutputLane.js';
 import Road from './Road.js';
 
@@ -137,5 +143,12 @@ export default class InputLane {
 
     public hasCarInPostLights(direction: RelativeDirection): boolean {
         return !!this.postLightsCar && this.postLightsCar.getDirection() === direction;
+    }
+
+    public collectSnapshot(): InputLanesSnapshot[number] {
+        return {
+            preLightsCars: this.preLightsCars.map((car) => car.toJson()),
+            postLightsCar: this.postLightsCar?.toJson() ?? null,
+        };
     }
 }

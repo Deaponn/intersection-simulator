@@ -1,80 +1,124 @@
+import { z } from 'zod';
 import { axes, relativeDirections, roadSides, worldDirections } from '#constants.js';
-import Car from '#simulation/actors/Car.js';
-import Pedestrian from '#simulation/actors/Pedestrian.js';
-import controllers from '#simulation/controllers/index.js';
+import { controllerTypes } from '#simulation/controllers/index.js';
 
-type AddVehicleCommand = {
-    [S in WorldDirection]: {
-        type: 'addVehicle';
-        vehicleId: string;
-        startRoad: S;
-        endRoad: Exclude<WorldDirection, S>;
-        laneIdx?: number;
-    };
-}[WorldDirection];
+const WorldDirectionSchema = z.enum(worldDirections);
+export type WorldDirection = z.infer<typeof WorldDirectionSchema>;
 
-interface AddPedestrianCommand {
-    type: 'addPedestrian';
-    pedestrianId: string;
-    roadToCross: WorldDirection;
-    startSide: RoadSide;
+const RelativeDirectionSchema = z.enum(relativeDirections);
+export type RelativeDirection = z.infer<typeof RelativeDirectionSchema>;
+
+const RoadSideSchema = z.enum(roadSides);
+export type RoadSide = z.infer<typeof RoadSideSchema>;
+
+const AxisSchema = z.enum(axes);
+export type Axis = z.infer<typeof AxisSchema>;
+
+const ControllerTypesSchema = z.enum(controllerTypes);
+export type ControllerTypes = z.infer<typeof ControllerTypesSchema>;
+
+const AddVehicleCommandSchema = z
+    .object({
+        type: z.literal('addVehicle'),
+        vehicleId: z.string(),
+        startRoad: WorldDirectionSchema,
+        endRoad: WorldDirectionSchema,
+        laneIdx: z.number().optional(),
+    })
+    .refine((data) => data.startRoad !== data.endRoad, {
+        message: 'endRoad must be different from startRoad',
+    });
+
+const AddPedestrianCommandSchema = z.object({
+    type: z.literal('addPedestrian'),
+    pedestrianId: z.string(),
+    roadToCross: WorldDirectionSchema,
+    startSide: RoadSideSchema,
+});
+
+const CommandSchema = z.discriminatedUnion('type', [
+    z.object({ type: z.literal('step') }),
+    AddVehicleCommandSchema,
+    AddPedestrianCommandSchema,
+]);
+export type Command = z.infer<typeof CommandSchema>;
+
+const LaneDescriptionSchema = z.object({
+    availableTurns: z.array(RelativeDirectionSchema),
+});
+
+const RoadDescriptionSchema = z.object({
+    lanes: z.array(LaneDescriptionSchema),
+});
+
+const IntersectionDescriptionSchema = z.record(WorldDirectionSchema, RoadDescriptionSchema);
+export type IntersectionDescription = z.infer<typeof IntersectionDescriptionSchema>;
+
+export const SimulationDescriptionSchema = z.object({
+    intersectionDescription: IntersectionDescriptionSchema.optional(),
+    controllerType: ControllerTypesSchema.optional(),
+    commands: z.array(CommandSchema),
+});
+export type SimulationDescription = z.infer<typeof SimulationDescriptionSchema>;
+
+const TrafficArrowsStateSchema = z.record(WorldDirectionSchema, z.boolean());
+export type TrafficArrowsState = z.infer<typeof TrafficArrowsStateSchema>;
+
+const TrafficLightsStateSchema = z.object({
+    arrows: TrafficArrowsStateSchema,
+    greenAxis: z.union([z.literal('none'), AxisSchema]),
+});
+export type TrafficLightsState = z.infer<typeof TrafficLightsStateSchema>;
+
+export interface StepStatus {
+    leftVehicles: string[];
 }
 
-export type Command = { type: 'step' } | AddVehicleCommand | AddPedestrianCommand;
+const PedestrianSchema = z.object({
+    pedestrianId: z.string(),
+});
+export type PedestrianJson = z.infer<typeof PedestrianSchema>;
 
-interface LaneDescription {
-    availableTurns: RelativeDirection[];
-}
+const CarSchema = z.object({
+    vehicleId: z.string(),
+    direction: RelativeDirectionSchema,
+});
+export type CarJson = z.infer<typeof CarSchema>;
 
-interface RoadDescription {
-    lanes: LaneDescription[];
-}
+const OutputLanesSchema = z.array(
+    z.object({
+        preCrosswalkCar: CarSchema.nullable(),
+        postCrosswalkCar: CarSchema.nullable(),
+    }),
+);
+export type OutputLanesSnapshot = z.infer<typeof OutputLanesSchema>;
 
-export type IntersectionDescription = Record<WorldDirection, RoadDescription>;
+const InputLanesSchema = z.array(
+    z.object({
+        preLightsCars: z.array(CarSchema),
+        postLightsCar: CarSchema.nullable(),
+    }),
+);
+export type InputLanesSnapshot = z.infer<typeof InputLanesSchema>;
 
-export interface SimulationDescription {
-    intersectionDescription?: IntersectionDescription;
-    controllerType?: ControllerTypes;
-    commands: Command[];
-}
+const RoadSnapshotSchema = z.object({
+    pedestrians: z.record(RoadSideSchema, z.array(PedestrianSchema)),
+    inputLanes: InputLanesSchema,
+    outputLanes: OutputLanesSchema,
+});
+export type RoadSnapshot = z.infer<typeof RoadSnapshotSchema>;
 
-export type Axis = (typeof axes)[number];
+const IntersectionSnapshotSchema = z.record(WorldDirectionSchema, RoadSnapshotSchema);
+export type IntersectionSnapshot = z.infer<typeof IntersectionSnapshotSchema>;
 
-export type WorldDirection = (typeof worldDirections)[number];
+const SnapshotSchema = z.object({
+    lights: TrafficLightsStateSchema,
+    intersectionState: IntersectionSnapshotSchema,
+    actorsLeft: z.array(z.string()),
+});
+export type Snapshot = z.infer<typeof SnapshotSchema>;
 
-export type RelativeDirection = (typeof relativeDirections)[number];
-
-export type RoadSide = (typeof roadSides)[number];
-
-export type TrafficArrowsState = Record<WorldDirection, boolean>;
-
-export type ControllerTypes = keyof typeof controllers;
-
-export interface TrafficLightsState {
-    arrows: TrafficArrowsState;
-    greenAxis: 'none' | Axis; // during axis change the value should be 'none' (both horizontal and vertical axes have yellow light)
-}
-
-interface InputLaneSnapshot {
-    preLightsCars: Car[];
-    postLightsCar: Car | null;
-}
-
-interface OutputLaneSnapshot {
-    preCrosswalkCar: Car | null;
-    postCrosswalkCar: Car[];
-}
-
-interface RoadSnapshot {
-    pedestrians: Record<RoadSide, Pedestrian[]>;
-    inputLanes: InputLaneSnapshot[];
-    outputLanes: OutputLaneSnapshot[];
-}
-
-export type IntersectionSnapshot = Record<WorldDirection, RoadSnapshot>;
-
-export interface Snapshot {
-    lights: TrafficLightsState;
-    intersectionState: IntersectionSnapshot;
-    actorsLeft: string[];
-}
+export const SimulationOutputSchema = z.object({
+    snapshots: z.array(SnapshotSchema),
+});
+export type SimulationOutput = z.infer<typeof SimulationOutputSchema>;

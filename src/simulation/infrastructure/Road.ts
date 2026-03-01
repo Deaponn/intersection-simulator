@@ -1,7 +1,14 @@
 import { axisOfDirection, oppositeAxis } from '#helpers/directionConversions.js';
 import Car from '#simulation/actors/Car.js';
 import Pedestrian from '#simulation/actors/Pedestrian.js';
-import { Axis, RelativeDirection, RoadSide, TrafficLightsState, WorldDirection } from '#simulation/types/index.js';
+import {
+    Axis,
+    RelativeDirection,
+    RoadSide,
+    RoadSnapshot,
+    TrafficLightsState,
+    WorldDirection,
+} from '#simulation/types/index.js';
 
 import InputLane from './InputLane.js';
 import OutputLane from './OutputLane.js';
@@ -93,5 +100,16 @@ export default class Road {
         const actorIds = this.pedestriansCrossed.map((pedestrian) => pedestrian.getId());
         this.pedestriansCrossed = [];
         return [...actorIds, ...this.outputLanes.flatMap((lane) => lane.collectOutput()).filter((id) => id !== null)];
+    }
+
+    public collectSnapshot(): RoadSnapshot {
+        return {
+            pedestrians: {
+                left: this.pedestriansWaiting.left.map((p) => p.toJson()),
+                right: this.pedestriansWaiting.right.map((p) => p.toJson()),
+            },
+            outputLanes: this.outputLanes.map((lane) => lane.collectSnapshot()),
+            inputLanes: this.inputLanes.map((lane) => lane.collectSnapshot()),
+        };
     }
 }

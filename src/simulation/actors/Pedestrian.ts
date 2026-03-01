@@ -1,3 +1,5 @@
+import { PedestrianJson } from '#simulation/types/index.js';
+
 export default class Pedestrian {
     private readonly pedestrianId: string;
 
@@ -7,5 +9,9 @@ export default class Pedestrian {
 
     public getId() {
         return this.pedestrianId;
+    }
+
+    public toJson(): PedestrianJson {
+        return { pedestrianId: this.pedestrianId };
     }
 }

@@ -1,6 +1,6 @@
 import Car from '#simulation/actors/Car.js';
 import Pedestrian from '#simulation/actors/Pedestrian.js';
-import { IntersectionDescription, RoadSide, TrafficLightsState, WorldDirection } from '#simulation/types/index.js';
+import { IntersectionDescription, IntersectionSnapshot, RoadSide, TrafficLightsState, WorldDirection } from '#simulation/types/index.js';
 
 import Road from './Road.js';
 
@@ -64,6 +64,15 @@ export default class Intersection {
 
     public getRoads() {
         return this.roads;
+    }
+
+    public collectSnapshot(): IntersectionSnapshot {
+        return {
+            north: this.roads.north.collectSnapshot(),
+            east: this.roads.east.collectSnapshot(),
+            south: this.roads.south.collectSnapshot(),
+            west: this.roads.west.collectSnapshot(),
+        }
     }
 
     public static basicIntersection(): IntersectionDescription {

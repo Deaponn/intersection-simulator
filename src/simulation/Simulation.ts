@@ -9,17 +9,22 @@ import {
     Command,
     ControllerTypes,
     IntersectionDescription,
+    IntersectionSnapshot,
     RelativeDirection,
+    SimulationOutput,
+    Snapshot,
+    StepStatus,
+    TrafficLightsState,
     WorldDirection,
 } from './types/index.js';
-
-interface StepStatus {
-    leftVehicles: string[];
-}
 
 export default class Simulation {
     private readonly intersection: Intersection;
     private readonly controller: Controller;
+    private lights: TrafficLightsState = {
+        arrows: { north: false, east: false, south: false, west: false },
+        greenAxis: 'none',
+    };
 
     constructor(intersectionDescription: IntersectionDescription, controllerType: ControllerTypes) {
         this.intersection = new Intersection(roadsFactory(intersectionDescription));
@@ -29,14 +34,14 @@ export default class Simulation {
     public runCommand(command: Command): StepStatus | null {
         switch (command.type) {
             case 'step': {
-                const lights = this.controller.step(this.intersection);
+                this.lights = this.controller.step(this.intersection);
                 // this is repeated 3 times because one step consists of 3 substeps
                 // substep 1 lets cars drive from pre lights to post lights
                 // substep 2 lets cars drive from post lights to pre crosswalk
                 // substep 3 lets cars drive across the crosswalk
-                let output = this.intersection.substep(lights);
-                output = [...output, ...this.intersection.substep(lights)];
-                output = [...output, ...this.intersection.substep(lights)];
+                let output = this.intersection.substep(this.lights);
+                output = [...output, ...this.intersection.substep(this.lights)];
+                output = [...output, ...this.intersection.substep(this.lights)];
                 return { leftVehicles: output };
             }
             case 'addVehicle': {
@@ -54,8 +59,30 @@ export default class Simulation {
         }
     }
 
-    public run(commands: Command[]): (StepStatus | null)[] {
+    public run(commands: Command[]): StepStatus[] {
         return commands.map((command) => this.runCommand(command)).filter((status) => status !== null);
+    }
+
+    public runWithSnapshot(commands: Command[]): SimulationOutput {
+        const snapshots: Snapshot[] = [];
+
+        for (const command of commands) {
+            const commandOutput = this.runCommand(command);
+            const { leftVehicles: actorsLeft } = commandOutput ?? { leftVehicles: [] };
+            const intersectionState = this.collectSnapshot();
+            const snapshot: Snapshot = {
+                intersectionState,
+                actorsLeft,
+                lights: this.lights,
+            };
+            snapshots.push(snapshot);
+        }
+
+        return { snapshots };
+    }
+
+    private collectSnapshot(): IntersectionSnapshot {
+        return this.intersection.collectSnapshot();
     }
 
     private static getRelativeDir(start: WorldDirection, end: WorldDirection): RelativeDirection {

@@ -1,4 +1,5 @@
 import Car from '#simulation/actors/Car.js';
+import { OutputLanesSnapshot } from '#simulation/types/index.js';
 import Road from './Road.js';
 
 export default class OutputLane {
@@ -35,5 +36,12 @@ export default class OutputLane {
         const carId = this.postCrosswalkCar?.getId() ?? null;
         this.postCrosswalkCar = null;
         return carId;
+    }
+
+    public collectSnapshot(): OutputLanesSnapshot[number] {
+        return {
+            preCrosswalkCar: this.preCrosswalkCar?.toJson() ?? null,
+            postCrosswalkCar: this.postCrosswalkCar?.toJson() ?? null,
+        };
     }
 }
