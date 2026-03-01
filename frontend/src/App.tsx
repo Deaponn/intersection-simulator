@@ -3,7 +3,7 @@ import { useUIStore } from "./store/useUIStore";
 
 import StartScreen from "./components/screens/Start";
 import IntersectionCreator from "./components/screens/IntersectionCreator";
-// import CommandCreator from "./components/screens/CommandCreator";
+import CommandCreator from "./components/screens/CommandCreator";
 // import Runner from "./components/screens/Runner";
 
 const steps = [
@@ -22,8 +22,8 @@ export default function App() {
         return <StartScreen />;
       case 2:
         return <IntersectionCreator />;
-      // case 3:
-      //   return <CommandCreator />;
+      case 3:
+        return <CommandCreator />;
       // case 4:
       //   return <Runner />;
       default:
