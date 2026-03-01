@@ -1,0 +1,16 @@
+{
+    "stepStatuses": [
+        {
+            "leftVehicles": [
+                "pedestrian-east",
+                "car-n-e",
+                "pedestrian-west"
+            ]
+        },
+        {
+            "leftVehicles": [
+                "car-s-w"
+            ]
+        }
+    ]
+}

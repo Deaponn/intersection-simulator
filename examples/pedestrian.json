@@ -1,0 +1,36 @@
+{
+    "intersectionDescription": {
+        "north": { "lanes": [{ "availableTurns": ["straightAhead", "left"] }] },
+        "east": { "lanes": [] },
+        "south": { "lanes": [{ "availableTurns": ["straightAhead", "left"] }] },
+        "west": { "lanes": [] }
+    },
+    "commands": [
+        {
+            "type": "addVehicle",
+            "vehicleId": "car-s-w",
+            "startRoad": "south",
+            "endRoad": "west"
+        },
+        {
+            "type": "addVehicle",
+            "vehicleId": "car-n-e",
+            "startRoad": "north",
+            "endRoad": "east"
+        },
+        {
+            "type": "addPedestrian",
+            "pedestrianId": "pedestrian-west",
+            "roadToCross": "west",
+            "startSide": "left"
+        },
+        {
+            "type": "addPedestrian",
+            "pedestrianId": "pedestrian-east",
+            "roadToCross": "east",
+            "startSide": "right"
+        },
+        { "type": "step" },
+        { "type": "step" }
+    ]
+}

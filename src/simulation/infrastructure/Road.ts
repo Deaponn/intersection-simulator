@@ -1,4 +1,4 @@
-import { axisOfDirection } from '#helpers/directionConversions.js';
+import { axisOfDirection, oppositeAxis } from '#helpers/directionConversions.js';
 import Car from '#simulation/actors/Car.js';
 import Pedestrian from '#simulation/actors/Pedestrian.js';
 import { Axis, RelativeDirection, RoadSide, TrafficLightsState, WorldDirection } from '#simulation/types/index.js';
@@ -11,9 +11,11 @@ export default class Road {
     private outputLanes: OutputLane[] = [];
     private readonly axis: Axis;
 
+    private static PEDESTRIAN_SUBSTEP_SPEED = 3;
     private pedestriansWaiting: Record<RoadSide, Pedestrian[]> = { left: [], right: [] };
     private pedestriansCrossed: Pedestrian[] = [];
     private willPedestriansCross = false;
+    private pedestrianCrossingProgress = Road.PEDESTRIAN_SUBSTEP_SPEED;
 
     constructor(position: WorldDirection) {
         this.axis = axisOfDirection[position];
@@ -25,7 +27,7 @@ export default class Road {
     }
 
     public decidePedestrians(lights: TrafficLightsState) {
-        this.willPedestriansCross = lights.greenAxis === this.axis;
+        this.willPedestriansCross = lights.greenAxis === oppositeAxis[this.axis];
     }
 
     public decidePreCrosswalk() {
@@ -41,6 +43,8 @@ export default class Road {
     }
 
     public walkPedestrians() {
+        this.pedestrianCrossingProgress--;
+        if (this.pedestrianCrossingProgress !== 0) return; // artificially prolong the timing of pedestrians crossing
         if (!this.willPedestriansCross) return;
         // all pedestrians cross at the same time, in one simulation step
         this.pedestriansCrossed = [...this.pedestriansWaiting.left, ...this.pedestriansWaiting.right];
