@@ -26,7 +26,6 @@ interface LaneDescription {
 
 interface RoadDescription {
     lanes: LaneDescription[];
-    hasCrosswalk: boolean;
 }
 
 export type IntersectionDescription = Record<WorldDirection, RoadDescription>;

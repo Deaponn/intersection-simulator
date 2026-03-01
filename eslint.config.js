@@ -33,4 +33,9 @@ export default defineConfig(
             '@typescript-eslint/unbound-method': 'off',
         },
     },
+    {
+        rules: {
+            '@typescript-eslint/restrict-template-expressions': 'off'
+        }
+    }
 );

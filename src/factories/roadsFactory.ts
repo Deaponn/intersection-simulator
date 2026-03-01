@@ -47,7 +47,7 @@ const roadsFactory: (intersectionDescription: IntersectionDescription) => Record
         };
 
         // going from right-most lane to left-most lane
-        for (let idx = intersectionDescription[worldDirection].lanes.length - 1; idx--; idx >= 0) {
+        for (let idx = intersectionDescription[worldDirection].lanes.length - 1; idx >= 0; idx--) {
             const lane = allInputLanes[worldDirection][idx];
             const laneDescription = intersectionDescription[worldDirection].lanes[idx];
 

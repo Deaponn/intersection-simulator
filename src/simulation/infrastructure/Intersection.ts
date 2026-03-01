@@ -70,19 +70,15 @@ export default class Intersection {
         return {
             north: {
                 lanes: [{ availableTurns: ['left', 'right', 'straightAhead'] }],
-                hasCrosswalk: true,
             },
             east: {
                 lanes: [{ availableTurns: ['left', 'right', 'straightAhead'] }],
-                hasCrosswalk: true,
             },
             south: {
                 lanes: [{ availableTurns: ['left', 'right', 'straightAhead'] }],
-                hasCrosswalk: true,
             },
             west: {
                 lanes: [{ availableTurns: ['left', 'right', 'straightAhead'] }],
-                hasCrosswalk: true,
             },
         };
     }

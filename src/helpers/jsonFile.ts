@@ -6,9 +6,8 @@ export async function load(path: string): Promise<unknown> {
     return commands;
 }
 
-// TODO: better error handling
 export function save(data: object, path: string) {
-    const stringifiedData = JSON.stringify(data);
+    const stringifiedData = JSON.stringify(data, undefined, 4);
     writeFile(path, stringifiedData, (err) => {
         if (err) console.log('Error occured while writing to file: ', err);
     });

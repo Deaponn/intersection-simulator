@@ -6,6 +6,7 @@
             "startRoad": "north",
             "endRoad": "west"
         },
+        { "type": "step" },
         { "type": "step" }
     ]
 }

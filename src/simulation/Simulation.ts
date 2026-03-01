@@ -10,13 +10,11 @@ import {
     ControllerTypes,
     IntersectionDescription,
     RelativeDirection,
-    TrafficLightsState,
     WorldDirection,
 } from './types/index.js';
 
 interface StepStatus {
     leftVehicles: string[];
-    trafficLights: TrafficLightsState;
 }
 
 export default class Simulation {
@@ -39,7 +37,7 @@ export default class Simulation {
                 let output = this.intersection.substep(lights);
                 output = [...output, ...this.intersection.substep(lights)];
                 output = [...output, ...this.intersection.substep(lights)];
-                return { leftVehicles: output, trafficLights: lights };
+                return { leftVehicles: output };
             }
             case 'addVehicle': {
                 const { vehicleId, startRoad, endRoad, laneIdx } = command;
@@ -57,7 +55,7 @@ export default class Simulation {
     }
 
     public run(commands: Command[]): (StepStatus | null)[] {
-        return commands.map((command) => this.runCommand(command));
+        return commands.map((command) => this.runCommand(command)).filter((status) => status !== null);
     }
 
     private static getRelativeDir(start: WorldDirection, end: WorldDirection): RelativeDirection {
