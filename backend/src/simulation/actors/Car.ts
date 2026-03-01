@@ -4,10 +4,7 @@ export default class Car {
     private readonly vehicleId: string;
     private readonly direction: RelativeDirection;
 
-    constructor(
-        vehicleId: string,
-        direction: RelativeDirection,
-    ) {
+    constructor(vehicleId: string, direction: RelativeDirection) {
         this.vehicleId = vehicleId;
         this.direction = direction;
     }

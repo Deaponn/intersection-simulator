@@ -4,7 +4,7 @@ import { SimulationDescription } from '#simulation/types/index.js';
 import { load, save } from './helpers/jsonFile.js';
 
 if (process.argv.length === 4) {
-    const inputData = await load(process.cwd() + '/' + process.argv[2]) as SimulationDescription;
+    const inputData = (await load(process.cwd() + '/' + process.argv[2])) as SimulationDescription;
     const simulation = new Simulation(
         inputData.intersectionDescription ?? Intersection.basicIntersection(),
         inputData.controllerType ?? 'simple-controller',
