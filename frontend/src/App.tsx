@@ -2,7 +2,7 @@ import { Box, Stepper, Step, StepLabel, Container, Paper } from "@mui/material";
 import { useUIStore } from "./store/useUIStore";
 
 import StartScreen from "./components/screens/Start";
-// import IntersectionCreator from "./components/screens/IntersectionCreator";
+import IntersectionCreator from "./components/screens/IntersectionCreator";
 // import CommandCreator from "./components/screens/CommandCreator";
 // import Runner from "./components/screens/Runner";
 
@@ -20,8 +20,8 @@ export default function App() {
     switch (currentStep) {
       case 1:
         return <StartScreen />;
-      // case 2:
-      //   return <IntersectionCreator />;
+      case 2:
+        return <IntersectionCreator />;
       // case 3:
       //   return <CommandCreator />;
       // case 4:
