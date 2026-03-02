@@ -1,9 +1,8 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useMemo } from "react";
 import { Layer, Group, Rect, Circle } from "react-konva";
 import Konva from "konva";
 import type { Snapshot } from "../types/index";
 import { flattenSnapshot } from "../utils/snapshotMapper";
-import { getCarFrame, lerp } from "../utils/animationHelpers";
 import { CAR_LENGTH, CAR_WIDTH } from "../utils/geometry";
 
 interface ActorsLayerProps {
@@ -25,27 +24,50 @@ export default function ActorsLayer({
   const pedRefs = useRef<Record<string, Konva.Circle>>({});
   const animRef = useRef<Konva.Animation | null>(null);
 
-  const prevState = prevSnapshot
-    ? flattenSnapshot(prevSnapshot)
-    : { cars: new Map(), peds: new Map() };
-  const currState = currSnapshot
-    ? flattenSnapshot(currSnapshot)
-    : { cars: new Map(), peds: new Map() };
+  const prevState = useMemo(
+    () =>
+      prevSnapshot
+        ? flattenSnapshot(prevSnapshot)
+        : { cars: new Map(), peds: new Map() },
+    [prevSnapshot],
+  );
 
-  const allCarIds = Array.from(
-    new Set([
-      ...prevState.cars.keys(),
-      ...currState.cars.keys(),
-      ...(currSnapshot?.actorsLeft || []),
-    ]),
+  const currState = useMemo(
+    () =>
+      currSnapshot
+        ? flattenSnapshot(currSnapshot)
+        : { cars: new Map(), peds: new Map() },
+    [currSnapshot],
   );
-  const allPedIds = Array.from(
-    new Set([
-      ...prevState.peds.keys(),
-      ...currState.peds.keys(),
-      ...(currSnapshot?.actorsLeft || []),
-    ]),
+
+  const allCarIds = useMemo(
+    () =>
+      Array.from(
+        new Set([
+          ...prevState.cars.keys(),
+          ...currState.cars.keys(),
+          ...(currSnapshot?.actorsLeft || []),
+        ]),
+      ),
+    [prevState, currState, currSnapshot],
   );
+
+  const allPedIds = useMemo(
+    () =>
+      Array.from(
+        new Set([
+          ...prevState.peds.keys(),
+          ...currState.peds.keys(),
+          ...(currSnapshot?.actorsLeft || []),
+        ]),
+      ),
+    [prevState, currState, currSnapshot],
+  );
+
+  const onCompleteRef = useRef(onAnimationComplete);
+  useEffect(() => {
+    onCompleteRef.current = onAnimationComplete;
+  }, [onAnimationComplete]);
 
   useEffect(() => {
     if (!isPlaying || !prevSnapshot || !currSnapshot) return;
@@ -59,70 +81,8 @@ export default function ActorsLayer({
       if (t >= 1) {
         t = 1;
         animRef.current?.stop();
-        onAnimationComplete();
+        onCompleteRef.current();
       }
-
-      allCarIds.forEach((id) => {
-        const node = carRefs.current[id];
-        if (!node) return;
-
-        const start = prevState.cars.get(id);
-        let end = currState.cars.get(id);
-
-        if (currSnapshot.actorsLeft.includes(id) && start) {
-          const rad = start.rotation * (Math.PI / 180);
-          end = {
-            ...start,
-            x: start.x + Math.cos(rad) * 300,
-            y: start.y + Math.sin(rad) * 300,
-            isBlinking: "none",
-          };
-        }
-
-        if (start && end) {
-          const frameState = getCarFrame(start, end, t);
-          node.x(frameState.x);
-          node.y(frameState.y);
-          node.rotation(frameState.rotation);
-
-          const isBlinkerOn = Math.floor(frame.time / 300) % 2 === 0;
-          const leftBlinker = node.findOne(".left-blinker");
-          const rightBlinker = node.findOne(".right-blinker");
-
-          if (leftBlinker)
-            leftBlinker.visible(
-              frameState.isBlinking === "left" && isBlinkerOn,
-            );
-          if (rightBlinker)
-            rightBlinker.visible(
-              frameState.isBlinking === "right" && isBlinkerOn,
-            );
-        } else if (end) {
-          node.x(end.x);
-          node.y(end.y);
-          node.rotation(end.rotation);
-        }
-      });
-
-      allPedIds.forEach((id) => {
-        const node = pedRefs.current[id];
-        if (!node) return;
-
-        const start = prevState.peds.get(id);
-        let end = currState.peds.get(id);
-
-        if (currSnapshot.actorsLeft.includes(id) && start) {
-          end = { id, x: start.x * 1.5, y: start.y * 1.5 };
-        }
-
-        if (start && end) {
-          node.x(lerp(start.x, end.x, t));
-          node.y(lerp(start.y, end.y, t));
-        } else if (end) {
-          node.x(end.x);
-          node.y(end.y);
-        }
-      });
     }, carRefs.current[allCarIds[0]]?.getLayer());
 
     animRef.current.start();
@@ -137,6 +97,8 @@ export default function ActorsLayer({
     playbackSpeed,
     allCarIds,
     allPedIds,
+    prevState,
+    currState,
   ]);
 
   return (
