@@ -13,7 +13,7 @@ if (process.argv.length === 4) {
     save({ stepStatuses: simulationOutput }, process.cwd() + '/' + process.argv[3]);
 } else {
     console.log(
-        `Wrong arguments count ${process.argv.length.toString()}. Usage: npm run once -- inputFile.json outputFile.json`,
+        `Wrong arguments count ${process.argv.length.toString()}. Usage: npm run simulate -- inputFile.json outputFile.json`,
     );
     process.exitCode = 1;
 }

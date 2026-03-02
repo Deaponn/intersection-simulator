@@ -6,4 +6,4 @@ export const relativeDirections = ["left", "right", "straightAhead"] as const;
 
 export const roadSides = ["left", "right"] as const;
 
-export const controllerTypes = ["simple-controller"] as const;
+export const controllerTypes = ["simple-controller", "with-arrows"] as const;
