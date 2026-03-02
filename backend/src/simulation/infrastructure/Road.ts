@@ -17,6 +17,7 @@ export default class Road {
     private inputLanes: InputLane[] = [];
     private outputLanes: OutputLane[] = [];
     private readonly axis: Axis;
+    private readonly position: WorldDirection;
 
     private static PEDESTRIAN_SUBSTEP_SPEED = 3;
     private pedestriansWaiting: Record<RoadSide, Pedestrian[]> = { left: [], right: [] };
@@ -26,6 +27,7 @@ export default class Road {
 
     constructor(position: WorldDirection) {
         this.axis = axisOfDirection[position];
+        this.position = position;
     }
 
     public assignLanes(inputLanes: InputLane[], outputLanes: OutputLane[]) {
@@ -50,14 +52,15 @@ export default class Road {
     }
 
     public walkPedestrians() {
+        if (!this.willPedestriansCross) return;
         this.pedestrianCrossingProgress--;
         if (this.pedestrianCrossingProgress !== 0) return; // artificially prolong the timing of pedestrians crossing
-        if (!this.willPedestriansCross) return;
         // all pedestrians cross at the same time, in one simulation step
         this.pedestriansCrossed = [...this.pedestriansWaiting.left, ...this.pedestriansWaiting.right];
         this.pedestriansWaiting.left = [];
         this.pedestriansWaiting.right = [];
         this.willPedestriansCross = false;
+        this.pedestrianCrossingProgress = Road.PEDESTRIAN_SUBSTEP_SPEED;
     }
 
     public drivePreCrosswalk() {
@@ -81,7 +84,9 @@ export default class Road {
     }
 
     public willPedestriansCrossFrom(side: RoadSide) {
-        return this.willPedestriansCross && this.pedestriansWaiting[side].length > 0;
+        if (this.pedestrianCrossingProgress === 3) // when pedestrians start crossing, they are present only on one of the road sides
+            return this.willPedestriansCross && this.pedestriansWaiting[side].length > 0;
+        return this.willPedestriansCross; // after some time, pedestrians are scattered along the whole road
     }
 
     public hasCarsDriving(direction: RelativeDirection): boolean {

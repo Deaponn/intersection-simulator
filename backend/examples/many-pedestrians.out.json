@@ -1,0 +1,39 @@
+{
+    "stepStatuses": [
+        {
+            "leftVehicles": [
+                "pedestrian-west"
+            ]
+        },
+        {
+            "leftVehicles": []
+        },
+        {
+            "leftVehicles": []
+        },
+        {
+            "leftVehicles": []
+        },
+        {
+            "leftVehicles": [
+                "pedestrian-north"
+            ]
+        },
+        {
+            "leftVehicles": [
+                "pedestrian-north"
+            ]
+        },
+        {
+            "leftVehicles": []
+        },
+        {
+            "leftVehicles": []
+        },
+        {
+            "leftVehicles": [
+                "pedestrian-west"
+            ]
+        }
+    ]
+}

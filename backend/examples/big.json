@@ -1,0 +1,165 @@
+{
+  "intersectionDescription": {
+    "north": {
+      "lanes": [
+        {
+          "availableTurns": [
+            "straightAhead"
+          ]
+        },
+        {
+          "availableTurns": [
+            "straightAhead",
+            "right"
+          ]
+        }
+      ]
+    },
+    "east": {
+      "lanes": [
+        {
+          "availableTurns": [
+            "left"
+          ]
+        },
+        {
+          "availableTurns": [
+            "right"
+          ]
+        }
+      ]
+    },
+    "south": {
+      "lanes": [
+        {
+          "availableTurns": [
+            "left"
+          ]
+        },
+        {
+          "availableTurns": [
+            "straightAhead"
+          ]
+        },
+        {
+          "availableTurns": [
+            "right",
+            "straightAhead"
+          ]
+        },
+        {
+          "availableTurns": [
+            "right"
+          ]
+        }
+      ]
+    },
+    "west": {
+      "lanes": [
+        {
+          "availableTurns": [
+            "left",
+            "straightAhead",
+            "right"
+          ]
+        }
+      ]
+    }
+  },
+  "controllerType": "simple-controller",
+  "commands": [
+    {
+      "type": "addVehicle",
+      "vehicleId": "vehicle1",
+      "startRoad": "north",
+      "endRoad": "west",
+      "laneIdx": 1
+    },
+    {
+      "type": "addVehicle",
+      "vehicleId": "vehicle2",
+      "startRoad": "north",
+      "endRoad": "south",
+      "laneIdx": 1
+    },
+    {
+      "type": "addVehicle",
+      "vehicleId": "vehicle3",
+      "startRoad": "north",
+      "endRoad": "south",
+      "laneIdx": 0
+    },
+    {
+      "type": "addVehicle",
+      "vehicleId": "vehicle4",
+      "startRoad": "west",
+      "endRoad": "south",
+      "laneIdx": 0
+    },
+    {
+      "type": "step"
+    },
+    {
+      "type": "addVehicle",
+      "vehicleId": "vehicle5",
+      "startRoad": "south",
+      "endRoad": "east",
+      "laneIdx": 3
+    },
+    {
+      "type": "addVehicle",
+      "vehicleId": "vehicle6",
+      "startRoad": "south",
+      "endRoad": "north",
+      "laneIdx": 2
+    },
+    {
+      "type": "step"
+    },
+    {
+      "type": "step"
+    },
+    {
+      "type": "addPedestrian",
+      "pedestrianId": "pedestrian1",
+      "roadToCross": "south",
+      "startSide": "right"
+    },
+    {
+      "type": "addPedestrian",
+      "pedestrianId": "pedestrian2",
+      "roadToCross": "east",
+      "startSide": "right"
+    },
+    {
+      "type": "addPedestrian",
+      "pedestrianId": "pedestrian3",
+      "roadToCross": "north",
+      "startSide": "left"
+    },
+    {
+      "type": "addPedestrian",
+      "pedestrianId": "pedestrian4",
+      "roadToCross": "west",
+      "startSide": "left"
+    },
+    {
+      "type": "step"
+    },
+    {
+      "type": "step"
+    },
+    {
+      "type": "step"
+    },
+    {
+      "type": "step"
+    },
+    {
+      "type": "step"
+    },
+    {
+      "type": "step"
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+    "commands": [
+        {
+            "type": "addPedestrian",
+            "pedestrianId": "pedestrian-north",
+            "roadToCross": "north",
+            "startSide": "left"
+        },
+        {
+            "type": "addPedestrian",
+            "pedestrianId": "pedestrian-west",
+            "roadToCross": "west",
+            "startSide": "left"
+        },
+        { "type": "step" },
+        { "type": "step" },
+        { "type": "step" },
+        { "type": "step" },
+        { "type": "step" },
+        {
+            "type": "addPedestrian",
+            "pedestrianId": "pedestrian-north",
+            "roadToCross": "north",
+            "startSide": "left"
+        },
+        {
+            "type": "addPedestrian",
+            "pedestrianId": "pedestrian-west",
+            "roadToCross": "west",
+            "startSide": "left"
+        },
+        { "type": "step" },
+        { "type": "step" },
+        { "type": "step" },
+        { "type": "step" }
+    ]
+}
