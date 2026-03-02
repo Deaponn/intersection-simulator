@@ -4,7 +4,7 @@ import { useUIStore } from "./store/useUIStore";
 import StartScreen from "./components/screens/Start";
 import IntersectionCreator from "./components/screens/IntersectionCreator";
 import CommandCreator from "./components/screens/CommandCreator";
-// import Runner from "./components/screens/Runner";
+import Runner from "./components/screens/Runner";
 
 const steps = [
   "Choose Preset",
@@ -24,8 +24,8 @@ export default function App() {
         return <IntersectionCreator />;
       case 3:
         return <CommandCreator />;
-      // case 4:
-      //   return <Runner />;
+      case 4:
+        return <Runner />;
       default:
         return <StartScreen />;
     }
