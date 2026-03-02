@@ -40,7 +40,7 @@ export const useSimulationStore = create<SimulationState>((set) => ({
     south: createDefaultRoad(),
     west: createDefaultRoad(),
   },
-  controllerType: null,
+  controllerType: "simple-controller",
   commands: [],
   simulationOutput: null,
 

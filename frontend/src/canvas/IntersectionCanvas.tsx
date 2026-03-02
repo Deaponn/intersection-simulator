@@ -31,7 +31,17 @@ export default function IntersectionCanvas({ mode, lightsState }: CanvasProps) {
   const intersectionDescription = useSimulationStore(
     (state) => state.intersectionDescription,
   );
+  const simulationOutput = useSimulationStore(
+    (state) => state.simulationOutput,
+  );
   const { selectedRoad, hoveredLaneIndex } = useUIStore();
+  const {
+    currentSnapshotIndex,
+    isPlaying,
+    playbackSpeed,
+    stepForward,
+    togglePlay,
+  } = useAnimationStore();
 
   useEffect(() => {
     const updateSize = () => {
@@ -53,8 +63,6 @@ export default function IntersectionCanvas({ mode, lightsState }: CanvasProps) {
     arrows: { north: false, east: false, south: false, west: false },
     greenAxis: "none",
   };
-
-  const { isPlaying, playbackSpeed } = useAnimationStore();
 
   return (
     <div ref={containerRef} style={{ width: "100%", height: "100%" }}>
@@ -95,35 +103,34 @@ export default function IntersectionCanvas({ mode, lightsState }: CanvasProps) {
           </Group>
         </Layer>
         {mode === "simulate" && (
-          <Group x={dimensions.width / 2} y={dimensions.height / 2}>
-            <ActorsLayer
-              prevSnapshot={
-                useAnimationStore.getState().currentSnapshotIndex > 0
-                  ? useSimulationStore.getState().simulationOutput?.snapshots[
-                      useAnimationStore.getState().currentSnapshotIndex - 1
-                    ] || null
-                  : null
-              }
-              currSnapshot={
-                useSimulationStore.getState().simulationOutput?.snapshots[
-                  useAnimationStore.getState().currentSnapshotIndex
-                ] || null
-              }
-              isPlaying={isPlaying}
-              playbackSpeed={playbackSpeed}
-              onAnimationComplete={() => {
-                const store = useAnimationStore.getState();
-                const maxIndex =
-                  (useSimulationStore.getState().simulationOutput?.snapshots
-                    .length || 1) - 1;
-                if (store.currentSnapshotIndex < maxIndex) {
-                  store.stepForward(maxIndex);
-                } else {
-                  store.togglePlay();
+          <Layer>
+            <Group x={dimensions.width / 2} y={dimensions.height / 2}>
+              <ActorsLayer
+                prevSnapshot={
+                  currentSnapshotIndex > 0
+                    ? simulationOutput?.snapshots[currentSnapshotIndex - 1] ||
+                      null
+                    : null
                 }
-              }}
-            />
-          </Group>
+                currSnapshot={
+                  simulationOutput?.snapshots[currentSnapshotIndex] || null
+                }
+                isPlaying={isPlaying}
+                playbackSpeed={playbackSpeed}
+                onAnimationComplete={() => {
+                  const maxIndex =
+                    (simulationOutput?.snapshots.length || 1) - 1;
+                  if (
+                    useAnimationStore.getState().currentSnapshotIndex < maxIndex
+                  ) {
+                    stepForward(maxIndex);
+                  } else {
+                    togglePlay();
+                  }
+                }}
+              />
+            </Group>
+          </Layer>
         )}
       </Stage>
     </div>
