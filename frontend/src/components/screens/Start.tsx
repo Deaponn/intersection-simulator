@@ -23,7 +23,7 @@ export default function StartScreen() {
   };
 
   const handleSelectPreset = (presetKey: string) => {
-    const preset = PRESETS[presetKey].data;
+    const preset = PRESETS[presetKey];
     setIntersectionPreset(preset);
     setStep(3);
   };
