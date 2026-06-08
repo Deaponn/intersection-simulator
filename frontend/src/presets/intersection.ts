@@ -89,6 +89,27 @@ export const PRESETS: Record<
       {
         type: "step",
       },
+      {
+        type: "addPedestrian",
+        pedestrianId: "pedestrian3",
+        roadToCross: "north",
+        startSide: "right",
+      },
+      {
+        type: "addPedestrian",
+        pedestrianId: "pedestrian4",
+        roadToCross: "south",
+        startSide: "right",
+      },
+      {
+        type: "addPedestrian",
+        pedestrianId: "pedestrian5",
+        roadToCross: "south",
+        startSide: "left",
+      },
+      {
+        type: "step",
+      },
     ],
   },
 };

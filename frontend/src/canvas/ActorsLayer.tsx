@@ -2,7 +2,11 @@ import { useEffect, useRef, useMemo } from "react";
 import { Group, Rect, Circle } from "react-konva";
 import Konva from "konva";
 import type { Snapshot } from "../types/index";
-import { flattenSnapshot, type CarRenderState, type PedRenderState } from "../utils/snapshotMapper";
+import {
+  flattenSnapshot,
+  type CarRenderState,
+  type PedRenderState,
+} from "../utils/snapshotMapper";
 import { CAR_LENGTH, CAR_WIDTH } from "../utils/geometry";
 import { getCarFrame, lerp } from "../utils/animationHelpers";
 
@@ -30,7 +34,10 @@ export default function ActorsLayer({
     () =>
       prevSnapshot
         ? flattenSnapshot(prevSnapshot)
-        : { cars: new Map<string, CarRenderState>(), peds: new Map<string, PedRenderState>() },
+        : {
+            cars: new Map<string, CarRenderState>(),
+            peds: new Map<string, PedRenderState>(),
+          },
     [prevSnapshot],
   );
 
@@ -38,7 +45,10 @@ export default function ActorsLayer({
     () =>
       currSnapshot
         ? flattenSnapshot(currSnapshot)
-        : { cars: new Map<string, CarRenderState>(), peds: new Map<string, PedRenderState>() },
+        : {
+            cars: new Map<string, CarRenderState>(),
+            peds: new Map<string, PedRenderState>(),
+          },
     [currSnapshot],
   );
 
@@ -86,9 +96,6 @@ export default function ActorsLayer({
         onCompleteRef.current();
       }
 
-      // --- THIS IS THE RESTORED LOGIC ---
-
-      // Animate Cars
       allCarIds.forEach((id) => {
         const node = carRefs.current[id];
         if (!node) return;
@@ -96,7 +103,6 @@ export default function ActorsLayer({
         const start = prevState.cars.get(id);
         let end = currState.cars.get(id);
 
-        // Handle actors leaving the intersection
         if (currSnapshot.actorsLeft.includes(id) && start) {
           const rad = (start.rotation - 90) * (Math.PI / 180);
           end = {
@@ -113,7 +119,6 @@ export default function ActorsLayer({
           node.y(frameState.y);
           node.rotation(frameState.rotation);
 
-          // Handle Blinker toggling
           const isBlinkerOn = Math.floor(frame.time / 300) % 2 === 0;
           const leftBlinker = node.findOne(".left-blinker");
           const rightBlinker = node.findOne(".right-blinker");
@@ -133,7 +138,6 @@ export default function ActorsLayer({
         }
       });
 
-      // Animate Pedestrians
       allPedIds.forEach((id) => {
         const node = pedRefs.current[id];
         if (!node) return;
@@ -142,7 +146,7 @@ export default function ActorsLayer({
         let end = currState.peds.get(id);
 
         if (currSnapshot.actorsLeft.includes(id) && start) {
-          end = { id, x: start.x * 1.5, y: start.y * 1.5 };
+          end = { ...start, x: start.endX, y: start.endY };
         }
 
         if (start && end) {
@@ -153,7 +157,6 @@ export default function ActorsLayer({
           node.y(end.y);
         }
       });
-      // --- END OF RESTORED LOGIC ---
     }, rootGroupRef.current?.getLayer());
 
     animRef.current.start();
