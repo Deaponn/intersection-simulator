@@ -1,6 +1,15 @@
 import { useEffect, useState } from "react";
-import { Box, Grid, Paper, Typography, Button } from "@mui/material";
-import { SkipNext, SkipPrevious } from "@mui/icons-material";
+import {
+  Box,
+  Grid,
+  Paper,
+  Typography,
+  Button,
+  IconButton,
+  Slider,
+  Stack,
+} from "@mui/material";
+import { PlayArrow, Pause, SkipNext, SkipPrevious } from "@mui/icons-material";
 import IntersectionCanvas from "../../canvas/IntersectionCanvas";
 import { useUIStore } from "../../store/useUIStore";
 import { useSimulationStore } from "../../store/useSimulationStore";
@@ -15,8 +24,15 @@ export default function Screen4SimulationRunner() {
     commands,
     setSimulationOutput,
   } = useSimulationStore();
-  const { currentSnapshotIndex, stepForward, stepBackward } =
-    useAnimationStore();
+  const {
+    currentSnapshotIndex,
+    isPlaying,
+    playbackSpeed,
+    stepForward,
+    stepBackward,
+    togglePlay,
+    setPlaybackSpeed,
+  } = useAnimationStore();
 
   const [isLoading, setIsLoading] = useState(false);
 
@@ -63,7 +79,7 @@ export default function Screen4SimulationRunner() {
   useEffect(() => {
     async function fetchSimulationResult() {
       const result = await Promise.resolve(
-        "Simulation output received. Ready to step.",
+        "Simulation output received. Ready to play.",
       );
       setServerLog(result);
     }
@@ -93,6 +109,7 @@ export default function Screen4SimulationRunner() {
               mode="simulate"
               lightsState={currentSnapshot?.lights}
             />
+            {/* overlay the <CarNode> and <PedestrianNode> elements here in the next step */}
           </Paper>
         </Grid>
 
@@ -115,38 +132,56 @@ export default function Screen4SimulationRunner() {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                gap: 2,
-                mb: 4,
+                gap: 1,
+                mb: 2,
               }}
             >
-              <Button
-                variant="contained"
-                startIcon={<SkipPrevious />}
+              <IconButton
                 onClick={stepBackward}
                 disabled={currentSnapshotIndex === 0}
               >
-                Previous
-              </Button>
-
-              <Button
-                variant="contained"
-                endIcon={<SkipNext />}
+                <SkipPrevious />
+              </IconButton>
+              <IconButton
+                color="primary"
+                onClick={togglePlay}
+                sx={{ transform: "scale(1.5)", mx: 2 }}
+              >
+                {isPlaying ? <Pause /> : <PlayArrow />}
+              </IconButton>
+              <IconButton
                 onClick={() => stepForward(maxIndex)}
                 disabled={currentSnapshotIndex === maxIndex}
               >
-                Next
-              </Button>
+                <SkipNext />
+              </IconButton>
             </Box>
 
+            <Stack
+              spacing={2}
+              direction="row"
+              sx={{ mb: 2, alignItems: "center" }}
+            >
+              <Typography variant="body2">Speed:</Typography>
+              <Slider
+                value={playbackSpeed}
+                min={0.5}
+                max={3}
+                step={0.5}
+                onChange={(_, val) => setPlaybackSpeed(val as number)}
+                valueLabelDisplay="auto"
+              />
+            </Stack>
+
             <Typography
-              variant="h6"
+              variant="caption"
               sx={{ textAlign: "center", display: "block", mb: 2 }}
             >
               Step {currentSnapshotIndex + 1} / {maxIndex + 1}
             </Typography>
 
             <Typography variant="subtitle2" gutterBottom>
-              Server output (current snapshot)
+              Server Output (Current Snapshot)
             </Typography>
             <Box
               sx={{
