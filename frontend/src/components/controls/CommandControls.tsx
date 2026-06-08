@@ -51,6 +51,7 @@ const calculateEndRoad = (
 // Theme colors to match screenshot
 const themeColors = {
   bg: "#f5f3ec",
+  bgCard: "#efebe1",
   cardBorder: "#e0dcd1",
   textMain: "#455a4d",
   textGreen: "#518263",
@@ -219,6 +220,7 @@ export default function CommandControls() {
       <Box
         sx={{
           border: `1px solid ${themeColors.cardBorder}`,
+          backgroundColor: themeColors.bgCard,
           borderRadius: 3,
           p: 2,
           mb: 2,
@@ -234,12 +236,7 @@ export default function CommandControls() {
           }}
         >
           <DirectionsCar fontSize="small" />
-          <Typography
-            variant="h6"
-            sx={{ fontFamily: "serif", fontSize: "1.2rem", fontWeight: 500 }}
-          >
-            Add Vehicle
-          </Typography>
+          <Typography variant="h6">Add Vehicle</Typography>
         </Box>
 
         <Typography
@@ -354,6 +351,7 @@ export default function CommandControls() {
           borderRadius: 3,
           p: 2,
           mb: 3,
+          backgroundColor: themeColors.bgCard,
         }}
       >
         <Box
@@ -366,12 +364,7 @@ export default function CommandControls() {
           }}
         >
           <DirectionsWalk fontSize="small" />
-          <Typography
-            variant="h6"
-            sx={{ fontFamily: "serif", fontSize: "1.2rem", fontWeight: 500 }}
-          >
-            Add Pedestrian
-          </Typography>
+          <Typography variant="h6">Add Pedestrian</Typography>
         </Box>
 
         <Typography
@@ -479,7 +472,7 @@ export default function CommandControls() {
 
       {/* Existing Command List (retained for functional parity, visually separated) */}
       <Box
-        sx={{ mt: 4, pt: 2, borderTop: `1px solid ${themeColors.cardBorder}` }}
+        sx={{ pt: 2, position: 'fixed', right: 20, top: 0, marginTop: 10, width: 350, height: 250, zIndex: 1, overflow: 'scroll' }}
       >
         <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
           Command Sequence ({commands.length})
@@ -491,7 +484,6 @@ export default function CommandControls() {
             bgcolor: themeColors.toggleInactiveBg,
             borderRadius: 2,
             border: `1px solid ${themeColors.cardBorder}`,
-            maxHeight: 150,
             overflowY: "auto",
           }}
         >

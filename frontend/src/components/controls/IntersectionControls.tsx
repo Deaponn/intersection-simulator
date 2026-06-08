@@ -87,7 +87,7 @@ export default function IntersectionControls() {
         flexDirection: "column",
         height: "100%",
         bgcolor: themeColors.bgApp,
-        p: { xs: 2, md: 4 },
+        p: { xs: 1, md: 2 },
         overflowY: "auto",
       }}
     >
@@ -106,8 +106,8 @@ export default function IntersectionControls() {
                 key={road}
                 sx={{
                   bgcolor: themeColors.bgCard,
-                  borderRadius: 4,
-                  p: 3,
+                  borderRadius: 3,
+                  p: 2,
                   border: `1px solid ${themeColors.borderLight}`,
                 }}
               >
