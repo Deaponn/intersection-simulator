@@ -35,14 +35,8 @@ export default class Simulation {
         switch (command.type) {
             case 'step': {
                 this.lights = this.controller.step(this.intersection);
-                // this is repeated 3 times because one step consists of 3 substeps
-                // substep 1 lets cars drive from pre lights to post lights
-                // substep 2 lets cars drive from post lights to pre crosswalk
-                // substep 3 lets cars drive across the crosswalk
-                let output = this.intersection.substep(this.lights);
-                output = [...output, ...this.intersection.substep(this.lights)];
-                output = [...output, ...this.intersection.substep(this.lights)];
-                return { leftVehicles: output };
+                const leftVehicles = this.intersection.substep(this.lights);
+                return { leftVehicles };
             }
             case 'addVehicle': {
                 const { vehicleId, startRoad, endRoad, laneIdx } = command;

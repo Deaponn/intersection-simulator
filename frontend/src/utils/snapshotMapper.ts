@@ -1,4 +1,10 @@
-import type { Snapshot, WorldDirection } from "../types/index";
+import type {
+  OutputLaneSnapshot,
+  RoadSide,
+  Snapshot,
+  WorldDirection,
+} from "../types/index";
+import { worldDirections } from "../constants";
 import {
   LANE_WIDTH,
   CAR_LENGTH,
@@ -20,6 +26,8 @@ export interface PedRenderState {
   id: string;
   x: number;
   y: number;
+  endX: number;
+  endY: number;
 }
 
 const toGlobal = (
@@ -34,15 +42,31 @@ const toGlobal = (
   };
 };
 
+const calcPedEnd = (
+  x: number,
+  y: number,
+  roadCrossed: WorldDirection,
+  startPosition: RoadSide,
+): { endX: number; endY: number } => {
+  switch (roadCrossed) {
+    case "north":
+      return { endX: x + 400 * (startPosition === "right" ? 1 : -1), endY: y };
+    case "east":
+      return { endX: x, endY: y + 400 * (startPosition === "right" ? 1 : -1) };
+    case "south":
+      return { endX: x + 400 * (startPosition === "right" ? -1 : 1), endY: y };
+    case "west":
+      return { endX: x, endY: y + 400 * (startPosition === "right" ? -1 : 1) };
+  }
+};
+
 export const flattenSnapshot = (
   snapshot: Snapshot,
 ): { cars: Map<string, CarRenderState>; peds: Map<string, PedRenderState> } => {
   const cars = new Map<string, CarRenderState>();
   const peds = new Map<string, PedRenderState>();
 
-  const directions: WorldDirection[] = ["north", "east", "south", "west"];
-
-  directions.forEach((dir) => {
+  worldDirections.forEach((dir) => {
     const road = snapshot.intersectionState[dir];
     const baseRotation = directionAngles[dir];
 
@@ -80,47 +104,61 @@ export const flattenSnapshot = (
       }
     });
 
-    road.outputLanes.forEach((lane, laneIdx) => {
-      const laneCenterX = (laneIdx + 0.5) * LANE_WIDTH;
+    road.outputLanes
+      .reduce((acc, i) => [i, ...acc], [] as OutputLaneSnapshot[])
+      .forEach((lane, laneIdx) => {
+        const laneCenterX = (laneIdx + 0.5) * LANE_WIDTH;
 
-      if (lane.preCrosswalkCar) {
-        const localY = -INTERSECTION_RADIUS + 10;
-        const global = toGlobal(laneCenterX, localY, dir);
-        cars.set(lane.preCrosswalkCar.vehicleId, {
-          id: lane.preCrosswalkCar.vehicleId,
-          ...global,
-          rotation: baseRotation,
-          isBlinking: "none",
-        });
-      }
+        if (lane.preCrosswalkCar) {
+          const localY = -INTERSECTION_RADIUS + 10;
+          const global = toGlobal(laneCenterX, localY, dir);
+          cars.set(lane.preCrosswalkCar.vehicleId, {
+            id: lane.preCrosswalkCar.vehicleId,
+            ...global,
+            rotation: baseRotation,
+            isBlinking: "none",
+          });
+        }
 
-      if (lane.postCrosswalkCar) {
-        const localY = -STOP_LINE_DIST - 40;
-        const global = toGlobal(laneCenterX, localY, dir);
-        cars.set(lane.postCrosswalkCar.vehicleId, {
-          id: lane.postCrosswalkCar.vehicleId,
-          ...global,
-          rotation: baseRotation,
-          isBlinking: "none",
-        });
-      }
-    });
+        if (lane.postCrosswalkCar) {
+          const localY = -STOP_LINE_DIST - 40;
+          const global = toGlobal(laneCenterX, localY, dir);
+          cars.set(lane.postCrosswalkCar.vehicleId, {
+            id: lane.postCrosswalkCar.vehicleId,
+            ...global,
+            rotation: baseRotation,
+            isBlinking: "none",
+          });
+        }
+      });
 
     road.pedestrians.left.forEach((ped, i) => {
       const localX = road.outputLanes.length * LANE_WIDTH + 20 + i * 10;
       const localY = -INTERSECTION_RADIUS - CROSSWALK_DEPTH / 2;
+      const { x, y } = toGlobal(localX, localY, dir);
+      const { endX, endY } = calcPedEnd(x, y, dir, "left");
+
       peds.set(ped.pedestrianId, {
         id: ped.pedestrianId,
-        ...toGlobal(localX, localY, dir),
+        x,
+        y,
+        endX,
+        endY,
       });
     });
 
     road.pedestrians.right.forEach((ped, i) => {
       const localX = -(road.inputLanes.length * LANE_WIDTH) - 20 - i * 10;
       const localY = -INTERSECTION_RADIUS - CROSSWALK_DEPTH / 2;
+      const { x, y } = toGlobal(localX, localY, dir);
+      const { endX, endY } = calcPedEnd(x, y, dir, "right");
+
       peds.set(ped.pedestrianId, {
         id: ped.pedestrianId,
-        ...toGlobal(localX, localY, dir),
+        x,
+        y,
+        endX,
+        endY,
       });
     });
   });
