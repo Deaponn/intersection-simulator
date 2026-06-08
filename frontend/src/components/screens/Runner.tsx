@@ -8,9 +8,53 @@ import { useAnimationStore } from "../../store/useAnimationStore";
 
 export default function Screen4SimulationRunner() {
   const setStep = useUIStore((state) => state.setStep);
-  const { simulationOutput } = useSimulationStore();
+  const {
+    simulationOutput,
+    intersectionDescription,
+    controllerType,
+    commands,
+    setSimulationOutput,
+  } = useSimulationStore();
   const { currentSnapshotIndex, stepForward, stepBackward } =
     useAnimationStore();
+
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    const handleRunSimulation = async () => {
+      setIsLoading(true);
+      try {
+        const payload = {
+          intersectionDescription,
+          controllerType,
+          commands,
+        };
+
+        const response = await fetch("/api/simulate", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        });
+
+        if (!response.ok) {
+          throw new Error(`Server responded with status: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        setSimulationOutput(data);
+      } catch (error) {
+        console.error("Failed to run simulation:", error);
+        alert("Error running simulation. Check the console.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    handleRunSimulation();
+  }, [commands, controllerType, intersectionDescription, setSimulationOutput]);
 
   const [serverLog, setServerLog] = useState<string>(
     "Initializing simulation...",
@@ -29,6 +73,8 @@ export default function Screen4SimulationRunner() {
 
   const maxIndex = simulationOutput ? simulationOutput.snapshots.length - 1 : 0;
   const currentSnapshot = simulationOutput?.snapshots[currentSnapshotIndex];
+
+  if (isLoading) return <>loading...</>;
 
   return (
     <Box sx={{ height: "100%", display: "flex", flexDirection: "column" }}>

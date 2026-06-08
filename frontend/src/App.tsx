@@ -41,7 +41,7 @@ export default function App() {
         bgcolor: "#f5f5f5",
       }}
     >
-      <Paper elevation={2} sx={{ p: 3, mb: 2, borderRadius: 0 }}>
+      <Paper elevation={2} sx={{ p: 1, borderRadius: 0, zIndex: 1 }}>
         <Container maxWidth="lg">
           <Stepper activeStep={currentStep - 1} alternativeLabel>
             {steps.map((label) => (
@@ -53,7 +53,7 @@ export default function App() {
         </Container>
       </Paper>
 
-      <Box sx={{ flexGrow: 1, overflow: "hidden", p: 2 }}>{renderScreen()}</Box>
+      <Box sx={{ flexGrow: 1, overflow: "hidden" }}>{renderScreen()}</Box>
     </Box>
   );
 }

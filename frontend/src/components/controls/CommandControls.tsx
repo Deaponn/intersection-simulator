@@ -21,9 +21,6 @@ import {
   RotateLeft,
   AddCircleOutline,
   PlaylistAdd,
-  ArrowBack,
-  DataObject,
-  Check,
 } from "@mui/icons-material";
 import { useSimulationStore } from "../../store/useSimulationStore";
 import { useUIStore } from "../../store/useUIStore";
@@ -34,6 +31,7 @@ import type {
   // Command,
 } from "../../types/index";
 import { worldDirections } from "../../constants";
+import NavBar from "./NavBar";
 
 // Helper to calculate end road based on start road and relative turn
 const calculateEndRoad = (
@@ -477,50 +475,7 @@ export default function CommandControls() {
       </Button>
 
       {/* --- BOTTOM ACTION BAR --- */}
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          mt: "auto",
-          pb: 1,
-        }}
-      >
-        <Button
-          startIcon={<ArrowBack />}
-          sx={{ color: "text.secondary", textTransform: "none" }}
-        >
-          Back
-        </Button>
-        <Button
-          variant="outlined"
-          startIcon={<DataObject />}
-          onClick={handleCopyPayload}
-          sx={{
-            color: themeColors.buttonGreen,
-            borderColor: themeColors.cardBorder,
-            bgcolor: "#efede5",
-            borderRadius: 5,
-            textTransform: "none",
-            "&:hover": { bgcolor: "#e5e3db" },
-          }}
-        >
-          Download JSON
-        </Button>
-        <Button
-          variant="contained"
-          endIcon={<Check />}
-          sx={{
-            bgcolor: themeColors.buttonGreen,
-            color: "white",
-            borderRadius: 5,
-            textTransform: "none",
-            "&:hover": { bgcolor: "#3e6649" },
-          }}
-        >
-          Next
-        </Button>
-      </Box>
+      <NavBar currentStep={3} handleJsonButton={handleCopyPayload} />
 
       {/* Existing Command List (retained for functional parity, visually separated) */}
       <Box

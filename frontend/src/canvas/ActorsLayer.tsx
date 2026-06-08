@@ -11,7 +11,11 @@ import { CAR_LENGTH, CAR_WIDTH } from "../utils/geometry";
 import { getCarFrame, lerp } from "../utils/animationHelpers";
 
 interface ActorsLayerProps {
+  prevSnapshot: Snapshot | null;
   currSnapshot: Snapshot | null;
+  isPlaying: boolean;
+  playbackSpeed: number;
+  onAnimationComplete: () => void;
 }
 
 export default function ActorsLayer({

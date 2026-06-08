@@ -5,8 +5,6 @@ import {
   Checkbox,
   FormControlLabel,
   Stack,
-  Button,
-  Divider,
   Tooltip,
   Paper,
 } from "@mui/material";
@@ -14,8 +12,6 @@ import {
   Add,
   Remove,
   KeyboardArrowDown,
-  ArrowBack,
-  Check,
   CheckCircle,
 } from "@mui/icons-material";
 import { useSimulationStore } from "../../store/useSimulationStore";
@@ -23,11 +19,12 @@ import { useUIStore } from "../../store/useUIStore";
 import { getDisabledTurns } from "../../utils/laneLogic";
 import type { RelativeDirection } from "../../types/index";
 import { worldDirections } from "../../constants";
+import NavBar from "./NavBar";
 
 export default function IntersectionControls() {
   const { intersectionDescription, setLaneCount, setLaneTurns } =
     useSimulationStore();
-  const { selectedRoad, setSelectedRoad, setHoveredLaneIndex, setStep } = useUIStore();
+  const { selectedRoad, setSelectedRoad, setHoveredLaneIndex } = useUIStore();
 
   const currentRoadData = intersectionDescription[selectedRoad] || {
     lanes: [],
@@ -349,75 +346,7 @@ export default function IntersectionControls() {
       </Stack>
 
       {/* --- BOTTOM NAVIGATION BAR --- */}
-      <Box>
-        <Divider sx={{ borderColor: themeColors.borderLight, mb: 3 }} />
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
-          <Button
-            startIcon={<ArrowBack />}
-            sx={{
-              color: themeColors.textDark,
-              textTransform: "none",
-              fontSize: "1rem",
-            }}
-            onClick={() => setStep(1)}
-          >
-            Back
-          </Button>
-
-          <Box sx={{ display: "flex", gap: 2 }}>
-            <Button
-              startIcon={
-                <Typography
-                  component="span"
-                  sx={{
-                    fontWeight: "bold",
-                    fontFamily: "monospace",
-                    fontSize: "1.1rem",
-                  }}
-                >
-                  {"{ }"}
-                </Typography>
-              }
-              onClick={handleCopyJson} // Maintaining functionality via mapped button
-              sx={{
-                color: themeColors.textGreen,
-                border: `1px solid ${themeColors.borderLight}`,
-                bgcolor: themeColors.bgCard,
-                borderRadius: 6,
-                textTransform: "none",
-                px: 3,
-                "&:hover": {
-                  bgcolor: themeColors.borderLight,
-                },
-              }}
-            >
-              Download JSON
-            </Button>
-            <Button
-              endIcon={<Check />}
-              variant="contained"
-              sx={{
-                bgcolor: themeColors.textGreen,
-                "&:hover": { bgcolor: "#4A7052" }, // Slightly darker on hover
-                borderRadius: 6,
-                textTransform: "none",
-                px: 4,
-                boxShadow: "none",
-                fontSize: "1rem",
-              }}
-              onClick={() => setStep(3)}
-            >
-              Next
-            </Button>
-          </Box>
-        </Box>
-      </Box>
+      <NavBar currentStep={2} handleJsonButton={handleCopyJson} />
     </Box>
   );
 }
