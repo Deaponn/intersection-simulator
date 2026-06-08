@@ -1,36 +1,37 @@
 import {
   Box,
   Typography,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
   IconButton,
   Checkbox,
   FormControlLabel,
   Stack,
-  TextField,
   Button,
   Divider,
   Tooltip,
   Paper,
 } from "@mui/material";
-import { Add, Remove, ContentCopy } from "@mui/icons-material";
+import {
+  Add,
+  Remove,
+  KeyboardArrowDown,
+  ArrowBack,
+  Check,
+  CheckCircle,
+} from "@mui/icons-material";
 import { useSimulationStore } from "../../store/useSimulationStore";
 import { useUIStore } from "../../store/useUIStore";
 import { getDisabledTurns } from "../../utils/laneLogic";
-import type { WorldDirection, RelativeDirection } from "../../types/index";
+import type { RelativeDirection } from "../../types/index";
 import { worldDirections } from "../../constants";
 
 export default function IntersectionControls() {
   const { intersectionDescription, setLaneCount, setLaneTurns } =
     useSimulationStore();
-  const { selectedRoad, setSelectedRoad, setHoveredLaneIndex } = useUIStore();
+  const { selectedRoad, setSelectedRoad, setHoveredLaneIndex, setStep } = useUIStore();
 
   const currentRoadData = intersectionDescription[selectedRoad] || {
     lanes: [],
   };
-  const laneCount = currentRoadData.lanes.length;
 
   const handleCopyJson = () => {
     navigator.clipboard.writeText(
@@ -47,206 +48,375 @@ export default function IntersectionControls() {
     setLaneTurns(selectedRoad, laneIndex, newTurns);
   };
 
+  // Color Palette specifically matching the screenshot design
+  const themeColors = {
+    bgApp: "#F5F3EB",
+    bgCard: "#EFEBE1",
+    bgLane: "#FAFAFA",
+    textGreen: "#5D8A66",
+    textGray: "#8A8A8A",
+    textDark: "#4A4A4A",
+    borderLight: "#E0DCD1",
+    circleUnchecked: "#DCD8CF",
+  };
+
+  // Custom Checkbox Icons
+  const UncheckedIcon = () => (
+    <Box
+      sx={{
+        width: 20,
+        height: 20,
+        borderRadius: "50%",
+        bgcolor: themeColors.circleUnchecked,
+      }}
+    />
+  );
+
+  const CheckedIcon = () => (
+    <CheckCircle
+      sx={{
+        color: themeColors.textGreen,
+        width: 22,
+        height: 22,
+        m: "-1px", // Adjusts slight size difference for centering
+      }}
+    />
+  );
+
   return (
     <Box
-      sx={{ display: "flex", flexDirection: "column", height: "100%", p: 2 }}
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        height: "100%",
+        bgcolor: themeColors.bgApp,
+        p: { xs: 2, md: 4 },
+        overflowY: "auto",
+      }}
     >
-      <Typography variant="h6" gutterBottom fontWeight="bold">
-        Intersection Settings
-      </Typography>
+      <Stack spacing={2.5} sx={{ flexGrow: 1, mb: 4 }}>
+        {worldDirections.map((road) => {
+          const isSelected = road === selectedRoad;
+          const roadData = intersectionDescription[road] || { lanes: [] };
+          const count = roadData.lanes.length;
+          const roadTitle =
+            road.charAt(0).toUpperCase() + road.slice(1) + " Road";
 
-      <FormControl fullWidth margin="normal" size="small">
-        <InputLabel>Selected Road</InputLabel>
-        <Select
-          value={selectedRoad}
-          label="Selected Road"
-          onChange={(e) => setSelectedRoad(e.target.value as WorldDirection)}
-        >
-          {worldDirections.map((road) => (
-            <MenuItem key={road} value={road}>
-              {road.toUpperCase()}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          my: 2,
-          p: 1,
-          bgcolor: "background.default",
-          borderRadius: 1,
-        }}
-      >
-        <Typography variant="body2" fontWeight="bold">
-          Input Lanes:
-        </Typography>
-        <Box sx={{ display: "flex", alignItems: "center" }}>
-          <IconButton
-            size="small"
-            onClick={() =>
-              setLaneCount(selectedRoad, Math.max(1, laneCount - 1))
-            }
-            disabled={laneCount <= 1}
-          >
-            <Remove />
-          </IconButton>
-          <Typography sx={{ mx: 2, minWidth: "20px", textAlign: "center" }}>
-            {laneCount}
-          </Typography>
-          <IconButton
-            size="small"
-            onClick={() =>
-              setLaneCount(selectedRoad, Math.min(6, laneCount + 1))
-            }
-          >
-            <Add />
-          </IconButton>
-        </Box>
-      </Box>
-
-      <Divider sx={{ mb: 2 }} />
-
-      <Box sx={{ flexGrow: 1, overflowY: "auto" }}>
-        <Typography variant="subtitle2" gutterBottom>
-          Lane Turn Configuration (Left to Right)
-        </Typography>
-
-        <Stack spacing={1}>
-          {currentRoadData.lanes.map((lane, index) => {
-            const disabledTurns = getDisabledTurns(
-              currentRoadData.lanes,
-              index,
-            );
-
+          // --- EXPANDED (SELECTED) ROAD CARD ---
+          if (isSelected) {
             return (
-              <Paper
-                key={index}
-                variant="outlined"
+              <Box
+                key={road}
                 sx={{
-                  p: 1,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  transition: "background-color 0.2s",
-                  "&:hover": { bgcolor: "action.hover" },
+                  bgcolor: themeColors.bgCard,
+                  borderRadius: 4,
+                  p: 3,
+                  border: `1px solid ${themeColors.borderLight}`,
                 }}
-                onMouseEnter={() => setHoveredLaneIndex(index)}
-                onMouseLeave={() => setHoveredLaneIndex(null)}
               >
                 <Typography
-                  variant="caption"
-                  sx={{ width: "40px", fontWeight: "bold" }}
+                  variant="h5"
+                  sx={{ color: themeColors.textGreen, mb: 3 }}
                 >
-                  Lane {index + 1}
+                  {roadTitle}
                 </Typography>
 
-                <Stack direction="row" spacing={0}>
-                  <Tooltip
-                    title={
-                      disabledTurns.left ? "Collides with lane to the left" : ""
-                    }
+                <Box sx={{ mb: 3 }}>
+                  <Typography
+                    variant="body2"
+                    sx={{ color: themeColors.textDark, mb: 1.5 }}
                   >
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          size="small"
-                          checked={lane.availableTurns.includes("left")}
-                          onChange={() => toggleTurn(index, "left")}
-                          disabled={disabledTurns.left}
-                        />
+                    Total Lanes
+                  </Typography>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                    <IconButton
+                      onClick={() =>
+                        setLaneCount(selectedRoad, Math.max(1, count - 1))
                       }
-                      label={<Typography variant="caption">Left</Typography>}
-                      sx={{ m: 0, mr: 1 }}
-                    />
-                  </Tooltip>
-                  <Tooltip
-                    title={
-                      disabledTurns.straightAhead
-                        ? "Collides with adjacent lane"
-                        : ""
-                    }
-                  >
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          size="small"
-                          checked={lane.availableTurns.includes(
-                            "straightAhead",
-                          )}
-                          onChange={() => toggleTurn(index, "straightAhead")}
-                          disabled={disabledTurns.straightAhead}
-                        />
+                      disabled={count <= 1}
+                      sx={{
+                        border: `1px solid ${themeColors.borderLight}`,
+                        bgcolor: "transparent",
+                      }}
+                    >
+                      <Remove sx={{ color: themeColors.textGreen }} />
+                    </IconButton>
+                    <Typography
+                      sx={{
+                        fontWeight: "bold",
+                        fontSize: "1.2rem",
+                        minWidth: "20px",
+                        textAlign: "center",
+                      }}
+                    >
+                      {count}
+                    </Typography>
+                    <IconButton
+                      onClick={() =>
+                        setLaneCount(selectedRoad, Math.min(6, count + 1))
                       }
-                      label={
-                        <Typography variant="caption">Straight</Typography>
-                      }
-                      sx={{ m: 0, mr: 1 }}
-                    />
-                  </Tooltip>
-                  <Tooltip
-                    title={
-                      disabledTurns.right
-                        ? "Collides with lane to the right"
-                        : ""
-                    }
-                  >
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          size="small"
-                          checked={lane.availableTurns.includes("right")}
-                          onChange={() => toggleTurn(index, "right")}
-                          disabled={disabledTurns.right}
-                        />
-                      }
-                      label={<Typography variant="caption">Right</Typography>}
-                      sx={{ m: 0 }}
-                    />
-                  </Tooltip>
+                      sx={{
+                        border: `1px solid ${themeColors.borderLight}`,
+                        bgcolor: "transparent",
+                      }}
+                    >
+                      <Add sx={{ color: themeColors.textGreen }} />
+                    </IconButton>
+                  </Box>
+                </Box>
+
+                <Stack spacing={1.5}>
+                  {roadData.lanes.map((lane, index) => {
+                    const disabledTurns = getDisabledTurns(
+                      roadData.lanes,
+                      index,
+                    );
+
+                    return (
+                      <Paper
+                        key={index}
+                        elevation={0}
+                        sx={{
+                          p: 1.5,
+                          px: 2.5,
+                          bgcolor: themeColors.bgLane,
+                          border: `1px solid ${themeColors.borderLight}`,
+                          borderRadius: 3,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                        }}
+                        onMouseEnter={() => setHoveredLaneIndex(index)}
+                        onMouseLeave={() => setHoveredLaneIndex(null)}
+                      >
+                        <Typography
+                          sx={{
+                            color: themeColors.textDark,
+                            minWidth: "60px",
+                          }}
+                        >
+                          Lane {index + 1}
+                        </Typography>
+
+                        <Box sx={{ display: "flex", gap: { xs: 1, sm: 3 } }}>
+                          <Tooltip
+                            title={
+                              disabledTurns.left
+                                ? "Collides with lane to the left"
+                                : ""
+                            }
+                          >
+                            <FormControlLabel
+                              control={
+                                <Checkbox
+                                  icon={<UncheckedIcon />}
+                                  checkedIcon={<CheckedIcon />}
+                                  checked={lane.availableTurns.includes("left")}
+                                  onChange={() => toggleTurn(index, "left")}
+                                  disabled={disabledTurns.left}
+                                  sx={{ p: 0.5 }}
+                                />
+                              }
+                              label={
+                                <Typography
+                                  sx={{
+                                    color: themeColors.textDark,
+                                    fontSize: "0.95rem",
+                                  }}
+                                >
+                                  Left
+                                </Typography>
+                              }
+                              sx={{ m: 0 }}
+                            />
+                          </Tooltip>
+
+                          <Tooltip
+                            title={
+                              disabledTurns.straightAhead
+                                ? "Collides with adjacent lane"
+                                : ""
+                            }
+                          >
+                            <FormControlLabel
+                              control={
+                                <Checkbox
+                                  icon={<UncheckedIcon />}
+                                  checkedIcon={<CheckedIcon />}
+                                  checked={lane.availableTurns.includes(
+                                    "straightAhead",
+                                  )}
+                                  onChange={() =>
+                                    toggleTurn(index, "straightAhead")
+                                  }
+                                  disabled={disabledTurns.straightAhead}
+                                  sx={{ p: 0.5 }}
+                                />
+                              }
+                              label={
+                                <Typography
+                                  sx={{
+                                    color: themeColors.textDark,
+                                    fontSize: "0.95rem",
+                                  }}
+                                >
+                                  Straight
+                                </Typography>
+                              }
+                              sx={{ m: 0 }}
+                            />
+                          </Tooltip>
+
+                          <Tooltip
+                            title={
+                              disabledTurns.right
+                                ? "Collides with lane to the right"
+                                : ""
+                            }
+                          >
+                            <FormControlLabel
+                              control={
+                                <Checkbox
+                                  icon={<UncheckedIcon />}
+                                  checkedIcon={<CheckedIcon />}
+                                  checked={lane.availableTurns.includes(
+                                    "right",
+                                  )}
+                                  onChange={() => toggleTurn(index, "right")}
+                                  disabled={disabledTurns.right}
+                                  sx={{ p: 0.5 }}
+                                />
+                              }
+                              label={
+                                <Typography
+                                  sx={{
+                                    color: themeColors.textDark,
+                                    fontSize: "0.95rem",
+                                  }}
+                                >
+                                  Right
+                                </Typography>
+                              }
+                              sx={{ m: 0 }}
+                            />
+                          </Tooltip>
+                        </Box>
+                      </Paper>
+                    );
+                  })}
                 </Stack>
-              </Paper>
+              </Box>
             );
-          })}
-        </Stack>
-      </Box>
+          }
 
-      <Divider sx={{ my: 2 }} />
+          // --- COLLAPSED (UNSELECTED) ROAD CARD ---
+          return (
+            <Box
+              key={road}
+              onClick={() => setSelectedRoad(road)}
+              sx={{
+                bgcolor: themeColors.bgCard,
+                borderRadius: 4,
+                p: 3,
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                cursor: "pointer",
+                border: `1px solid ${themeColors.borderLight}`,
+                "&:hover": {
+                  opacity: 0.9,
+                },
+              }}
+            >
+              <Box>
+                <Typography
+                  variant="h6"
+                  sx={{ color: themeColors.textGreen, mb: 0.5 }}
+                >
+                  {roadTitle}
+                </Typography>
+                <Typography
+                  variant="body2"
+                  sx={{ color: themeColors.textGray }}
+                >
+                  {count} {count === 1 ? "Lane" : "Lanes"} configured
+                </Typography>
+              </Box>
+              <KeyboardArrowDown sx={{ color: themeColors.textGray }} />
+            </Box>
+          );
+        })}
+      </Stack>
 
-      <Box sx={{ height: "150px", display: "flex", flexDirection: "column" }}>
+      {/* --- BOTTOM NAVIGATION BAR --- */}
+      <Box>
+        <Divider sx={{ borderColor: themeColors.borderLight, mb: 3 }} />
         <Box
           sx={{
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            mb: 1,
           }}
         >
-          <Typography variant="subtitle2">Intersection Description</Typography>
           <Button
-            size="small"
-            startIcon={<ContentCopy />}
-            onClick={handleCopyJson}
+            startIcon={<ArrowBack />}
+            sx={{
+              color: themeColors.textDark,
+              textTransform: "none",
+              fontSize: "1rem",
+            }}
+            onClick={() => setStep(1)}
           >
-            Copy JSON
+            Back
           </Button>
+
+          <Box sx={{ display: "flex", gap: 2 }}>
+            <Button
+              startIcon={
+                <Typography
+                  component="span"
+                  sx={{
+                    fontWeight: "bold",
+                    fontFamily: "monospace",
+                    fontSize: "1.1rem",
+                  }}
+                >
+                  {"{ }"}
+                </Typography>
+              }
+              onClick={handleCopyJson} // Maintaining functionality via mapped button
+              sx={{
+                color: themeColors.textGreen,
+                border: `1px solid ${themeColors.borderLight}`,
+                bgcolor: themeColors.bgCard,
+                borderRadius: 6,
+                textTransform: "none",
+                px: 3,
+                "&:hover": {
+                  bgcolor: themeColors.borderLight,
+                },
+              }}
+            >
+              Download JSON
+            </Button>
+            <Button
+              endIcon={<Check />}
+              variant="contained"
+              sx={{
+                bgcolor: themeColors.textGreen,
+                "&:hover": { bgcolor: "#4A7052" }, // Slightly darker on hover
+                borderRadius: 6,
+                textTransform: "none",
+                px: 4,
+                boxShadow: "none",
+                fontSize: "1rem",
+              }}
+              onClick={() => setStep(3)}
+            >
+              Next
+            </Button>
+          </Box>
         </Box>
-        <TextField
-          multiline
-          fullWidth
-          rows={4}
-          value={JSON.stringify(intersectionDescription, null, 2)}
-          slotProps={{
-            input: {
-              readOnly: true,
-              sx: { fontSize: "0.75rem", fontFamily: "monospace" },
-            },
-          }}
-          sx={{ flexGrow: 1, overflowY: "auto" }}
-        />
       </Box>
     </Box>
   );
